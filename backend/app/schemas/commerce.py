@@ -59,6 +59,13 @@ class CustomerRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class CustomerListRead(BaseModel):
+    items: list[CustomerRead]
+    total: int
+    page: int
+    limit: int
+
+
 class PurchaseItemInput(BaseModel):
     product_id: UUID
     quantity: Decimal = Field(gt=0, max_digits=12, decimal_places=2)

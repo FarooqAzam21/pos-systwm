@@ -8,7 +8,7 @@ from app.database.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.customer import Customer
 from app.models.user import User, UserRole
-from app.schemas.commerce import CustomerCreate, CustomerRead, CustomerUpdate
+from app.schemas.commerce import CustomerCreate, CustomerListRead, CustomerRead, CustomerUpdate
 from app.services.commerce import (
     create_customer,
     customer_detail,
@@ -20,21 +20,21 @@ from app.services.audit import record_audit
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
 
-@router.get("")
+@router.get("", response_model=CustomerListRead)
 def list_customers(
     search: str | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=200),
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-) -> dict:
+) -> CustomerListRead:
     stmt = select(Customer).where(Customer.business_id == user.business_id)
     if search:
         term = f"%{search.strip()}%"
         stmt = stmt.where(or_(Customer.name.ilike(term), Customer.phone.ilike(term), Customer.email.ilike(term)))
     total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
     items = db.scalars(stmt.order_by(Customer.name).offset((page - 1) * limit).limit(limit)).all()
-    return {"items": items, "total": total, "page": page, "limit": limit}
+    return CustomerListRead(items=items, total=total, page=page, limit=limit)
 
 
 @router.post("", response_model=CustomerRead, status_code=status.HTTP_201_CREATED)

@@ -35,6 +35,21 @@ def create_inventory(client, auth):
     return supplier_response.json(), product_response.json()
 
 
+def test_customer_list_serializes_customer_models(client):
+    auth = headers(register(client, "Customer List Store", "Casey Owner", "customer-list@commerce.test"))
+    created = client.post("/customers", headers=auth, json={
+        "name": "Jordan Customer",
+        "phone": "555-0199",
+    })
+    assert created.status_code == 201, created.text
+
+    response = client.get("/customers", headers=auth)
+    assert response.status_code == 200, response.text
+    assert response.json()["total"] == 1
+    assert response.json()["items"][0]["name"] == "Jordan Customer"
+    assert response.json()["items"][0]["phone"] == "555-0199"
+
+
 def test_purchase_checkout_payment_return_and_dashboard(client):
     auth = headers(register(client, "Commerce Store", "Casey Owner", "casey@commerce.test"))
     supplier, product = create_inventory(client, auth)
