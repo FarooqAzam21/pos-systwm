@@ -6,6 +6,7 @@ from app.models.expense import Expense, ExpenseCategory
 from app.models.payment import Payment, PaymentMethod, PaymentReferenceType, PaymentType
 from app.models.product import Product
 from app.models.purchase import Purchase, PurchaseItem, PurchasePaymentStatus
+from app.models.purchase_order import PurchaseOrder, PurchaseOrderItem
 from app.models.sale import Sale, SaleItem, SalePaymentStatus, SaleStatus
 from app.models.sale_return import SaleReturn, SaleReturnItem
 from app.models.stock_movement import MovementType, StockMovement
@@ -29,6 +30,8 @@ __all__ = [
     "Purchase",
     "PurchaseItem",
     "PurchasePaymentStatus",
+    "PurchaseOrder",
+    "PurchaseOrderItem",
     "Sale",
     "SaleItem",
     "SalePaymentStatus",

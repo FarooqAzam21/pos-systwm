@@ -7,6 +7,7 @@ const tabs = [
   { label: 'Products', to: '/inventory/products' },
   { label: 'Categories', to: '/inventory/categories' },
   { label: 'Suppliers', to: '/inventory/suppliers' },
+  { label: 'Purchase Orders', to: '/inventory/orders', managersOnly: true },
   { label: 'Stock Movements', to: '/inventory/movements' },
   { label: 'Low Stock', to: '/inventory/low-stock' },
 ]
@@ -26,7 +27,7 @@ export default function InventoryPage() {
         {canManageProducts && <Link className="primary-button" to="/inventory/products" state={{ openAddProduct: true }}><Plus size={15} />Add product</Link>}
       </div>
       <nav className="inventory-tabs" aria-label="Inventory sections">
-        {tabs.map(({ label, to }) => (
+        {tabs.filter((tab) => !tab.managersOnly || canManageProducts).map(({ label, to }) => (
           <NavLink key={to} to={to} end={to === '/inventory'} className={({ isActive }) => `inventory-tab ${isActive ? 'active' : ''}`}>
             {label}
           </NavLink>

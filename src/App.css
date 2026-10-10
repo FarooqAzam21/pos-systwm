@@ -225,6 +225,13 @@
 .filter-select, .date-field input, .commerce-page select, .commerce-page input, .commerce-page textarea { min-height: 37px; padding: 0 10px; border: 1px solid #e5e8ee; border-radius: 7px; outline: none; color: #465263; background: white; font-size: 11px; }
 .commerce-page textarea { padding-top: 9px; }
 .filter-select:focus, .commerce-page select:focus, .commerce-page input:focus, .commerce-page textarea:focus { border-color: #8d9af1; box-shadow: 0 0 0 3px #5064e914; }
+.inventory-page, .inventory-subpage, .inventory-overview, .commerce-page { min-width: 0; }
+.inventory-subpage, .inventory-overview { display: grid; gap: 14px; }
+.subpage-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; min-width: 0; }
+.subpage-toolbar > .search-input { flex: 1 1 230px; }
+.subpage-toolbar > .filter-select, .subpage-toolbar > select { min-width: min(100%, 170px); }
+.select-input { display: grid; min-width: 180px; gap: 5px; color: #697587; font-size: 10px; font-weight: 600; }
+.inventory-subpage > *, .inventory-overview > *, .commerce-page > * { min-width: 0; }
 .commerce-panel { overflow: hidden; }
 .commerce-panel > .panel-heading { padding: 17px 18px 11px; }
 .commerce-panel .data-table { overflow-x: auto; }
@@ -315,6 +322,12 @@
 .purchase-line { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(4, minmax(75px, 1fr)) 30px; align-items: center; gap: 8px; }
 .purchase-line input, .purchase-line select { width: 100%; }
 .purchase-line-head { color: #8993a0; font-size: 9px; font-weight: 700; }
+.purchase-order-modal { width: min(100%, 760px); display: grid; gap: 16px; }
+.purchase-order-modal > label { display: grid; gap: 6px; color: #586474; font-size: 12px; font-weight: 600; }
+.purchase-order-modal .purchase-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.order-line { grid-template-columns: minmax(180px, 2fr) minmax(90px, .6fr) minmax(130px, 1fr) auto; }
+.table-secondary { display: block; margin-top: 4px; color: #8993a0; font-size: 11px; }
+.table-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .purchase-footer { display: grid; grid-template-columns: 1fr 220px; gap: 20px; padding-top: 16px; border-top: 1px solid #edf0f4; }
 .purchase-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 12px; }
 .purchase-totals { display: grid; align-content: start; gap: 9px; }
@@ -550,3 +563,64 @@
 .table-toolbar { display: flex; align-items: center; padding: 15px 18px 10px; border-bottom: 1px solid #edf0f4; }
 .table-toolbar .search-input { width: min(100%, 460px); min-width: 240px; }
 .auth-form input { min-height: 44px; padding: 0 12px; font-size: 13px; }
+.data-table { width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
+.data-table table { min-width: 640px; }
+
+@media (max-width: 900px) {
+  .sidebar, .sidebar-collapsed .sidebar { width: 252px; transform: translateX(-105%); box-shadow: 15px 0 40px #17213a18; }
+  .sidebar.mobile-open { transform: translateX(0); }
+  .sidebar-collapsed .main-content, .main-content { width: 100%; margin-left: 0; }
+  .sidebar-collapsed .brand-name, .sidebar-collapsed .workspace-name, .sidebar-collapsed .workspace-switcher > svg, .sidebar-collapsed .nav-label, .sidebar-collapsed .nav-item span, .sidebar-collapsed .plan-card > div, .sidebar-collapsed .sidebar-user-copy { display: initial; }
+  .mobile-close, .mobile-menu { display: inline-grid; }
+  .mobile-close { margin-left: auto; }
+  .mobile-scrim { position: fixed; inset: 0; z-index: 25; display: block; border: 0; background: #18203365; }
+  .collapse-button { display: none; }
+  .topbar { padding-right: 20px; padding-left: 20px; }
+  .page-content { padding-right: 24px; padding-left: 24px; }
+}
+
+@media (max-width: 600px) {
+  .page-content { padding: 20px 12px 30px; }
+  .topbar { padding: 0 10px; }
+  .page-heading h1 { font-size: 21px; }
+  .settings-form-grid, .inventory-form.two-column, .purchase-meta, .purchase-footer, .purchase-controls { grid-template-columns: minmax(0, 1fr); }
+  .inventory-form .span-2, .settings-form-grid .field-span-2 { grid-column: auto; }
+  .purchase-line { grid-template-columns: minmax(0, 1fr) 58px 64px 30px; gap: 5px; }
+  .purchase-line select, .purchase-line input { min-width: 0; padding-right: 5px; padding-left: 5px; font-size: 11px; }
+  .purchase-totals { max-width: none; }
+  .pos-layout { grid-template-columns: minmax(0, 1fr); }
+  .pos-cart, .pos-catalog { padding: 12px; }
+  .pos-cart-item { grid-template-columns: minmax(0, 1fr) 84px 62px 26px; gap: 5px; }
+  .pos-line-adjustments input { width: 100%; min-height: 40px; padding: 0 7px; font-size: 12px; }
+  .pos-new-customer-fields { grid-template-columns: minmax(0, 1fr); }
+  .pos-new-customer-fields label:first-child { grid-column: auto; }
+  .report-filters > *, .audit-filters > * { flex: 1 1 100%; min-width: 0; }
+  .table-toolbar { padding: 12px 12px 9px; }
+  .table-toolbar .search-input { width: 100%; min-width: 0; }
+  .pagination-row { flex-wrap: wrap; gap: 8px; padding: 12px 8px; }
+  .pagination-row span { flex: 1 1 100%; order: -1; text-align: center; }
+  .modal-backdrop { align-items: start; padding: 10px; }
+  .modal-card, .modal-card.large, .product-modal { width: 100% !important; max-height: calc(100dvh - 20px); padding: 16px; border-radius: 12px; }
+  .invoice-page .sale-action-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .invoice-page .sale-action-buttons > button { justify-content: center; padding: 0 8px; font-size: 10px; }
+  .invoice-page .sale-action-buttons > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .invoice-heading { padding: 20px 16px; }
+  .invoice-bottom { padding: 14px 12px 16px; }
+}
+
+@media (max-width: 380px) {
+  .topbar-workspace { display: none; }
+  .topbar-left, .topbar-actions { gap: 3px; }
+  .page-heading h1 { font-size: 19px; }
+  .kpi-grid, .dashboard-kpis, .commerce-kpis { grid-template-columns: minmax(0, 1fr); }
+  .pos-cart-item { grid-template-columns: minmax(0, 1fr) 72px 58px 24px; gap: 4px; }
+  .pos-line-adjustments { grid-template-columns: minmax(0, 1fr); }
+  .purchase-line { grid-template-columns: minmax(0, 1fr) 52px 58px 26px; }
+  .inventory-tabs .inventory-tab { padding-right: 11px; padding-left: 11px; }
+}
+
+@media (hover: none) {
+  .icon-button-inline, .icon-button { min-width: 40px; min-height: 40px; }
+  .primary-button, .ghost-button, .category-add-button { min-height: 44px; }
+  .inventory-tab { min-height: 46px; }
+}

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, PackagePlus, Search } from 'lucide-react'
 import { inventoryService } from '../services/inventoryService'
+import { useNavigate } from 'react-router-dom'
 
 export default function InventoryLowStock() {
+  const navigate = useNavigate()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -60,7 +62,7 @@ export default function InventoryLowStock() {
                   <td>{item.supplier_name || 'Unassigned'}</td>
                   <td><span className="tag warning">{item.stock_status}</span></td>
                   <td>
-                    <button className="primary-button small" type="button">
+                    <button className="primary-button small" type="button" onClick={() => navigate('/inventory/orders', { state: { restockProductId: item.id, restockQuantity: item.required_quantity, supplierName: item.supplier_name } })}>
                       <PackagePlus size={14} /> Restock
                     </button>
                   </td>

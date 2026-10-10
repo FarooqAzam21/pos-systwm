@@ -44,7 +44,7 @@ The Vite application is at the repository root; its source tree is `src/`.
 2. Copy `backend/.env.example` to `backend/.env`.
 3. Set `DATABASE_URL` to your PostgreSQL connection string using the `postgresql+psycopg://` driver form. URL-encode special characters in credentials.
 4. Replace `SECRET_KEY` with a private random value of at least 32 characters.
-5. Set `ACCESS_TOKEN_EXPIRE_MINUTES` and comma-separated `FRONTEND_ORIGINS`.
+5. Set `ACCESS_TOKEN_EXPIRE_MINUTES` and comma-separated `FRONTEND_ORIGINS` (include `https://pos-systwm.vercel.app` for the deployed frontend).
 6. Copy root `.env.example` to `.env` if the frontend API URL differs from `http://localhost:8000`.
 
 Never commit `.env` files or production secrets.
@@ -75,7 +75,7 @@ npm install
 npm run dev
 ```
 
-Vite runs at `http://localhost:5173`. To use a different API host, set `VITE_API_URL` in root `.env` and restart Vite.
+Vite runs at `http://localhost:5173`. The deployed Vercel project must have `VITE_API_URL` set to the public URL of this project's API; the frontend URL itself is not an API URL. Set `VITE_API_URL` in root `.env` for local builds and restart Vite.
 
 ## Authentication and tenant isolation
 

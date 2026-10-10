@@ -35,6 +35,18 @@ export const commerceService = {
   async createPurchase(payload) {
     return (await api.post('/purchases', payload)).data
   },
+  async getPurchaseOrders(params = {}) {
+    return (await api.get('/purchase-orders', { params: cleanParams(params) })).data
+  },
+  async createPurchaseOrder(payload) {
+    return (await api.post('/purchase-orders', payload)).data
+  },
+  async updatePurchaseOrder(id, status) {
+    return (await api.patch(`/purchase-orders/${id}`, { status })).data
+  },
+  async receivePurchaseOrder(id, payload) {
+    return (await api.post(`/purchase-orders/${id}/receive`, payload)).data
+  },
   async getSales(params = {}) {
     return (await api.get('/sales', { params: cleanParams(params) })).data
   },

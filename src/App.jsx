@@ -11,6 +11,7 @@ import InventoryCategories from './pages/InventoryCategories'
 import InventorySuppliers from './pages/InventorySuppliers'
 import InventoryMovements from './pages/InventoryMovements'
 import InventoryLowStock from './pages/InventoryLowStock'
+import PurchaseOrders from './pages/PurchaseOrders'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Settings from './pages/Settings'
@@ -56,6 +57,9 @@ function App() {
                   <Route path="suppliers" element={<InventorySuppliers />} />
                   <Route path="movements" element={<InventoryMovements />} />
                   <Route path="low-stock" element={<InventoryLowStock />} />
+                  <Route element={<RoleGuard roles={['Owner', 'Admin', 'Manager']} />}>
+                    <Route path="orders" element={<PurchaseOrders />} />
+                  </Route>
                 </Route>
                 <Route path="purchases" element={<Purchases />} />
                 <Route path="purchases/new" element={<PurchaseNew />} />

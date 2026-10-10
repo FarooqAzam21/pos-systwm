@@ -14,6 +14,7 @@ from app.routers import (
     payments,
     products,
     purchases,
+    purchase_orders,
     reports,
     sales,
     suppliers,
@@ -28,7 +29,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip() for origin in settings.frontend_origins.split(",")],
+    allow_origins=[origin.strip().rstrip("/") for origin in settings.frontend_origins.split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
@@ -43,6 +44,7 @@ app.include_router(suppliers.router)
 app.include_router(inventory.router)
 app.include_router(customers.router)
 app.include_router(purchases.router)
+app.include_router(purchase_orders.router)
 app.include_router(sales.router)
 app.include_router(payments.router)
 app.include_router(expenses.router)

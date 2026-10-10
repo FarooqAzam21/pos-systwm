@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     database_url: str
     secret_key: str
     access_token_expire_minutes: int = 60
-    frontend_origins: str = "http://localhost:5173"
+    frontend_origins: str = "https://pos-systwm.vercel.app,http://localhost:5173"
     algorithm: str = "HS256"
 
     model_config = SettingsConfigDict(
