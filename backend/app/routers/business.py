@@ -7,6 +7,8 @@ from app.models.business import Business
 from app.models.user import User, UserRole
 from app.schemas.business import BusinessRead, BusinessUpdate
 from app.services.audit import record_audit
+from app.services.cache import cached_response
+from app.core.config import settings
 
 router = APIRouter(prefix="/business", tags=["Business"])
 
@@ -24,7 +26,10 @@ def get_user_business(user: User, db: Session) -> Business:
 def read_business(
     user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> Business:
-    return get_user_business(user, db)
+    return cached_response(
+        "settings", user.business_id, user.role.value, {}, settings.settings_cache_ttl_seconds,
+        lambda: get_user_business(user, db),
+    )
 
 
 @router.put("", response_model=BusinessRead)

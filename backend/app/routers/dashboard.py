@@ -9,6 +9,8 @@ from app.dependencies.auth import get_current_user
 from app.models.sale import Sale, SaleStatus
 from app.models.user import User
 from app.services.commerce import dashboard_overview
+from app.services.cache import cached_response
+from app.core.config import settings
 from app.services.dates import (
     business_datetime_bounds,
     business_local_date_expression,
@@ -32,36 +34,37 @@ def get_dashboard_overview(
         raise HTTPException(status_code=422, detail="End date must not be before start date")
     if (end - start).days > 366:
         raise HTTPException(status_code=422, detail="Date range cannot exceed 366 days")
-    if user.role.value == "Cashier":
-        today_start, today_end = business_datetime_bounds(
-            db, user.business_id, today, today
-        )
-        totals = db.execute(
-            select(func.coalesce(func.sum(Sale.total_amount), 0), func.count(Sale.id)).where(
-                Sale.business_id == user.business_id,
-                Sale.sale_date >= today_start,
-                Sale.sale_date < today_end,
-                Sale.status != SaleStatus.VOIDED,
-            )
-        ).one()
-        trend_start, trend_end = business_datetime_bounds(
-            db, user.business_id, start, end
-        )
-        trend_day = business_local_date_expression(
-            db, user.business_id, Sale.sale_date
-        )
-        trend_rows = db.execute(
-            select(trend_day, func.sum(Sale.total_amount))
-            .where(
-                Sale.business_id == user.business_id,
-                Sale.sale_date >= trend_start,
-                Sale.sale_date < trend_end,
-                Sale.status != SaleStatus.VOIDED,
-            )
-            .group_by(trend_day)
-        ).all()
-        return {
-            "today": {"sales": totals[0] or 0, "transactions": totals[1]},
-            "sales_trend": [{"date": str(day)[:10], "sales": total or 0} for day, total in trend_rows],
-        }
-    return dashboard_overview(db, user.business_id, start, end)
+
+    def load() -> dict:
+        if user.role.value == "Cashier":
+            today_start, today_end = business_datetime_bounds(db, user.business_id, today, today)
+            totals = db.execute(
+                select(func.coalesce(func.sum(Sale.total_amount), 0), func.count(Sale.id)).where(
+                    Sale.business_id == user.business_id,
+                    Sale.sale_date >= today_start,
+                    Sale.sale_date < today_end,
+                    Sale.status != SaleStatus.VOIDED,
+                )
+            ).one()
+            trend_start, trend_end = business_datetime_bounds(db, user.business_id, start, end)
+            trend_day = business_local_date_expression(db, user.business_id, Sale.sale_date)
+            trend_rows = db.execute(
+                select(trend_day, func.sum(Sale.total_amount))
+                .where(
+                    Sale.business_id == user.business_id,
+                    Sale.sale_date >= trend_start,
+                    Sale.sale_date < trend_end,
+                    Sale.status != SaleStatus.VOIDED,
+                )
+                .group_by(trend_day)
+            ).all()
+            return {
+                "today": {"sales": totals[0] or 0, "transactions": totals[1]},
+                "sales_trend": [{"date": str(day)[:10], "sales": total or 0} for day, total in trend_rows],
+            }
+        return dashboard_overview(db, user.business_id, start, end)
+
+    return cached_response(
+        "dashboard", user.business_id, user.role.value,
+        {"start": start, "end": end}, settings.dashboard_cache_ttl_seconds, load,
+    )

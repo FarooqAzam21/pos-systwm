@@ -10,6 +10,14 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 60
     frontend_origins: str = "https://pos-systwm.vercel.app,http://localhost:5173"
     algorithm: str = "HS256"
+    redis_url: str | None = None
+    redis_socket_timeout_seconds: float = 0.4
+    redis_connect_timeout_seconds: float = 0.4
+    redis_max_connections: int = 20
+    dashboard_cache_ttl_seconds: int = 30
+    reports_cache_ttl_seconds: int = 60
+    catalog_cache_ttl_seconds: int = 60
+    settings_cache_ttl_seconds: int = 600
 
     model_config = SettingsConfigDict(
         env_file=".env",

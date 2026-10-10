@@ -10,6 +10,8 @@ from app.models.category import Category
 from app.models.user import User, UserRole
 from app.schemas.category import CategoryCreate, CategoryRead, CategoryUpdate
 from app.services.audit import record_audit
+from app.services.cache import cached_response
+from app.core.config import settings
 
 router = APIRouter(prefix="/categories", tags=["Categories"])
 
@@ -18,12 +20,11 @@ router = APIRouter(prefix="/categories", tags=["Categories"])
 def list_categories(
     user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> list[Category]:
-    return list(
-        db.scalars(
-            select(Category)
-            .where(Category.business_id == user.business_id)
-            .order_by(Category.name)
-        )
+    return cached_response(
+        "categories", user.business_id, user.role.value, {}, settings.catalog_cache_ttl_seconds,
+        lambda: list(db.scalars(
+            select(Category).where(Category.business_id == user.business_id).order_by(Category.name)
+        )),
     )
 
 

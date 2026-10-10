@@ -1,7 +1,31 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.services.cache import create_redis_client, set_redis_client
+from redis import RedisError
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    client = create_redis_client()
+    set_redis_client(client)
+    if client is not None:
+        try:
+            client.ping()
+        except RedisError:
+            # Redis is an optional accelerator; keep the API available without it.
+            import logging
+            logging.getLogger(__name__).warning("redis_startup_unavailable fallback=database", exc_info=True)
+    application.state.redis_cache = client
+    try:
+        yield
+    finally:
+        set_redis_client(None)
+        if client is not None:
+            client.close()
 from app.routers import (
     audit_logs,
     auth,
@@ -25,6 +49,7 @@ app = FastAPI(
     title="POS & Inventory Management API",
     version="1.0.0",
     description="Multi-tenant SaaS foundation for business operations.",
+    lifespan=lifespan,
 )
 
 app.add_middleware(

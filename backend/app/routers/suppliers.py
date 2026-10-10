@@ -15,13 +15,14 @@ from app.services.audit import record_audit
 router = APIRouter(prefix="/suppliers", tags=["Suppliers"])
 
 
-def supplier_read(db: Session, supplier: Supplier) -> dict:
-    outstanding = db.scalar(
-        select(func.coalesce(func.sum(Purchase.outstanding_amount), 0)).where(
-            Purchase.business_id == supplier.business_id,
-            Purchase.supplier_id == supplier.id,
-        )
-    ) or 0
+def supplier_read(db: Session, supplier: Supplier, outstanding=None) -> dict:
+    if outstanding is None:
+        outstanding = db.scalar(
+            select(func.coalesce(func.sum(Purchase.outstanding_amount), 0)).where(
+                Purchase.business_id == supplier.business_id,
+                Purchase.supplier_id == supplier.id,
+            )
+        ) or 0
     return {
         "id": supplier.id,
         "business_id": supplier.business_id,
@@ -49,7 +50,17 @@ def list_suppliers(
         .where(Supplier.business_id == user.business_id)
         .order_by(Supplier.name)
     ).all()
-    return [supplier_read(db, supplier) for supplier in suppliers]
+    if not suppliers:
+        return []
+    balances = dict(db.execute(
+        select(Purchase.supplier_id, func.coalesce(func.sum(Purchase.outstanding_amount), 0))
+        .where(
+            Purchase.business_id == user.business_id,
+            Purchase.supplier_id.in_([supplier.id for supplier in suppliers]),
+        )
+        .group_by(Purchase.supplier_id)
+    ).all())
+    return [supplier_read(db, supplier, balances.get(supplier.id, 0)) for supplier in suppliers]
 
 
 @router.get("/{supplier_id}", response_model=SupplierRead)

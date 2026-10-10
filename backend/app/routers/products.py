@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.database.session import get_db
 from app.dependencies.auth import get_current_user, require_roles
@@ -75,7 +75,7 @@ def list_products(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> dict:
-    stmt = select(Product).where(Product.business_id == user.business_id)
+    stmt = select(Product).options(selectinload(Product.category)).where(Product.business_id == user.business_id)
     if active_only:
         stmt = stmt.where(Product.is_active.is_(True))
     if search:
@@ -116,7 +116,7 @@ def read_product(
     db: Session = Depends(get_db),
 ) -> dict:
     product = db.scalar(
-        select(Product).where(
+        select(Product).options(selectinload(Product.category)).where(
             Product.id == product_id,
             Product.business_id == user.business_id,
         )

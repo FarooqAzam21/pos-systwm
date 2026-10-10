@@ -161,3 +161,19 @@ python -m compileall -q app alembic tests
 ```
 
 Apply schema changes to the configured PostgreSQL database with `alembic upgrade head`.
+
+## Optional Redis caching
+
+The API can run without Redis. Set `REDIS_URL` on the backend to enable the shared Redis-compatible cache; PostgreSQL remains authoritative for all business data. Cached reads currently cover dashboard overview, report summaries and paginated reports, the category list, and business settings. Dashboard TTL is 30 seconds, reports and categories 60 seconds, and business settings 10 minutes (each cache entry receives up to 10% TTL jitter). Product and inventory quantities, transactions, payment balances, customers, and suppliers are intentionally not cached.
+
+Mutations to sales, purchases, returns, payments, expenses, products, stock, categories, business settings, users, and daily closings advance scoped cache generations only after a successful SQLAlchemy commit. Rollbacks do not invalidate. Each request still authenticates and authorizes against PostgreSQL before reading cached data. Redis failures are logged and reads fall back to PostgreSQL; failures in the actual database loader still propagate. Logs include cache hit/miss/error/invalidation events and operation latency without cache keys or business data.
+
+### Enable on Render
+
+1. In the Render Dashboard select **New > Key Value**, choose a name, and select the same region and workspace as the backend web service. Choose a plan within your budget; free instances do not provide persistence, which is acceptable because this cache is disposable.
+2. Wait for the instance to become **Available**, then open its **Connect** menu and copy the **Internal URL**. Render's internal URL uses `redis://` and is reachable by services in the same workspace and region. Use the internal URL; external access is unnecessary. If using an external connection for a non-Render backend, use the provider's `rediss://` TLS URL and restrict allowed IP ranges.
+3. In the backend web service's **Environment** settings, add `REDIS_URL` with that copied internal URL. Do not put it in Vercel or commit it to Git. The remaining Redis settings are optional and default to conservative values in `backend/.env.example`.
+4. Save changes and redeploy the backend. Startup attempts a Redis ping; if Redis is not ready or later becomes unavailable, the API remains available and logs a fallback warning.
+5. Verify the deployment's `/health` response remains `{"status":"ok"}` and inspect backend logs for `cache_miss`, subsequent `cache_hit`, `cache_invalidation`, or `cache_*_error` events. `/health` intentionally does not reveal Redis status or infrastructure details.
+
+Render Key Value provides Redis-compatible Valkey instances. Its internal URL is available from the instance's Connect menu; internal connections require the same workspace and region. See [Render Key Value documentation](https://render.com/docs/key-value) for current plan, authentication, and connection details.

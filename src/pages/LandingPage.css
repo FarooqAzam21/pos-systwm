@@ -305,3 +305,73 @@ html:has(.landing) { scroll-behavior: smooth; }
   html:has(.landing) { scroll-behavior: auto; }
   .landing *, .landing *::before, .landing *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Readability scale: keep supporting copy comfortable at normal viewing size. */
+.landing-nav > a { font-size: 14px; }
+.hero-kicker, .section-eyebrow { font-size: 10px; }
+.hero-description { font-size: 17px; }
+.button-primary, .button-secondary { font-size: 14px; }
+.hero-value-line { font-size: 13px; }
+.section-heading > p, .audience-heading > p { font-size: 16px; }
+.feature-card { min-height: 250px; }
+.feature-number { font-size: 10px; }
+.feature-card h3, .workflow-step h3 { font-size: 16px; }
+.feature-card p, .workflow-step p { font-size: 14px; }
+.workflow-heading > p, .benefits-copy > p, .product-copy > p { font-size: 15px; }
+.text-link { font-size: 14px; }
+.benefit-item > span { font-size: 10px; }
+.benefit-item p, .product-copy li { font-size: 14px; }
+.audience-grid article { min-height: 165px; }
+.audience-grid h3 { font-size: 15px; }
+.audience-grid p { font-size: 13px; }
+.faq-heading p, .faq-list details > p { font-size: 14px; }
+.faq-list summary { min-height: 68px; font-size: 15px; }
+.closing-content p { font-size: 15px; }
+.footer-about > p { font-size: 12px; }
+.agency-link, .footer-links a { font-size: 12px; }
+.footer-links > div > span { font-size: 9px; }
+.footer-bottom { font-size: 11px; }
+
+/* Keep the illustrative interface legible while retaining its compact preview feel. */
+.preview-nav { font-size: 9px; }
+.preview-nav-label, .preview-side-bottom { font-size: 8px; }
+.preview-topbar { font-size: 9px; }
+.preview-user i { font-size: 9px; }
+.preview-title small { font-size: 8px; }
+.preview-title h3 { font-size: 17px; }
+.preview-title p { font-size: 9px; }
+.preview-period { font-size: 8px; }
+.preview-metric small { font-size: 8px; }
+.preview-metric strong { font-size: 16px; }
+.preview-metric span { font-size: 8px; }
+.preview-chart-heading b { font-size: 9px; }
+.preview-chart-heading small, .preview-chart-heading > span { font-size: 8px; }
+.preview-y-labels, .preview-x-labels, .preview-stock > div { font-size: 8px; }
+.preview-stock > b, .preview-stock > div > strong { font-size: 8px; }
+.preview-stock > div > small { font-size: 7px; }
+.preview-caption { font-size: 9px; }
+
+@media (max-width: 760px) {
+  .hero-description { font-size: 16px; }
+  .section-heading > p, .audience-heading > p { font-size: 15px; }
+  .feature-card { min-height: 242px; }
+  .feature-card h3, .workflow-step h3 { font-size: 14px; }
+  .feature-card p, .workflow-step p, .benefit-item p, .product-copy li { font-size: 12px; }
+  .workflow-heading > p, .benefits-copy > p, .product-copy > p { font-size: 14px; }
+  .audience-grid article { min-height: 155px; }
+  .audience-grid h3 { font-size: 13px; }
+  .audience-grid p { font-size: 11px; }
+  .faq-heading p, .faq-list details > p { font-size: 13px; }
+  .faq-list summary { font-size: 14px; }
+  .closing-content p { font-size: 14px; }
+  .preview-nav { font-size: 8px; }
+  .preview-metric small { font-size: 7px; }
+  .preview-metric strong { font-size: 12px; }
+  .preview-metric span { font-size: 7px; }
+}
+@media (max-width: 390px) {
+  .feature-card { min-height: 250px; }
+  .feature-card p, .workflow-step p, .benefit-item p { font-size: 11px; }
+  .audience-grid h3 { font-size: 12px; }
+  .audience-grid p { font-size: 10px; }
+}

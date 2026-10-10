@@ -26,6 +26,8 @@ from app.services.reports import (
 )
 from app.services.dates import business_today
 from app.services.audit import record_audit
+from app.services.cache import cached_response
+from app.core.config import settings
 
 router = APIRouter(prefix="/reports", tags=["Reports"])
 REPORT_ROLES = (UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)
@@ -132,7 +134,11 @@ def read_dashboard_analytics(
     db: Session = Depends(get_db),
 ) -> dict:
     start, end = _range(db, user.business_id, start_date, end_date)
-    return dashboard_analytics(db, user.business_id, start, end)
+    return cached_response(
+        "reports", user.business_id, user.role.value, {"report": "dashboard", "start": start, "end": end},
+        settings.reports_cache_ttl_seconds,
+        lambda: dashboard_analytics(db, user.business_id, start, end),
+    )
 
 
 @router.get("/profit-and-loss")
@@ -143,8 +149,11 @@ def read_profit_and_loss(
     db: Session = Depends(get_db),
 ) -> dict:
     start, end = _range(db, user.business_id, start_date, end_date)
-    data, _ = _report_data(db, user.business_id, "profit-and-loss", start, end, {}, 1, 50)
-    return data
+    return cached_response(
+        "reports", user.business_id, user.role.value, {"report": "profit-and-loss", "start": start, "end": end},
+        settings.reports_cache_ttl_seconds,
+        lambda: _report_data(db, user.business_id, "profit-and-loss", start, end, {}, 1, 50)[0],
+    )
 
 
 @router.get("/daily-closing")
@@ -154,12 +163,13 @@ def read_daily_closing(
     db: Session = Depends(get_db),
 ) -> dict:
     report_day = report_date or business_today(db, user.business_id)
-    summary = daily_closing(db, user.business_id, report_day)
-    return {
-        "items": [{field: summary[field] for field in DAILY_CLOSING_FIELDS}],
-        "total": 1,
-        "summary": summary,
-    }
+    def load() -> dict:
+        summary = daily_closing(db, user.business_id, report_day)
+        return {"items": [{field: summary[field] for field in DAILY_CLOSING_FIELDS}], "total": 1, "summary": summary}
+    return cached_response(
+        "reports", user.business_id, user.role.value,
+        {"report": "daily-closing", "report_date": report_day}, settings.reports_cache_ttl_seconds, load,
+    )
 
 
 @router.post("/daily-closing", status_code=201)
@@ -331,5 +341,9 @@ def read_report(
         "movement_type": movement_type,
         "search": search,
     }
-    data, _ = _report_data(db, user.business_id, report_name, start, end, filters, page, limit)
-    return data
+    return cached_response(
+        "reports", user.business_id, user.role.value,
+        {"report": report_name, "start": start, "end": end, "filters": filters, "page": page, "limit": limit},
+        settings.reports_cache_ttl_seconds,
+        lambda: _report_data(db, user.business_id, report_name, start, end, filters, page, limit)[0],
+    )
