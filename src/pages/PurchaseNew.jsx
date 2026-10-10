@@ -28,11 +28,24 @@ export default function PurchaseNew() {
 
   useEffect(() => {
     let active = true
-    Promise.all([inventoryService.getSuppliers(), inventoryService.getProducts({ limit: 200 })])
-      .then(([supplierList, productList]) => {
+    Promise.all([
+      inventoryService.getSuppliers(),
+      inventoryService.getProducts({ limit: 200, page: 1, active_only: true }),
+    ])
+      .then(async ([supplierList, firstPage]) => {
+        const totalPages = Math.ceil((firstPage.total || firstPage.items?.length || 0) / 200)
+        const productPages = [firstPage]
+        for (let page = 2; page <= totalPages; page += 4) {
+          const batch = Array.from(
+            { length: Math.min(4, totalPages - page + 1) },
+            (_, index) => inventoryService.getProducts({ limit: 200, page: page + index, active_only: true }),
+          )
+          productPages.push(...await Promise.all(batch))
+        }
+        const productList = productPages.flatMap((page) => page.items || [])
         if (active) {
           setSuppliers(supplierList.filter((item) => item.is_active))
-          setProducts((productList.items || []).filter((item) => item.is_active))
+          setProducts(productList.filter((item) => item.is_active))
         }
       })
       .catch((error) => notify(getApiErrorMessage(error), 'error'))

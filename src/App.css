@@ -365,6 +365,7 @@
 .pos-new-customer-fields label:first-child { grid-column: 1 / -1; }
 .pos-new-customer-fields label { display: grid; gap: 6px; color: #586474; font-size: 10px; font-weight: 600; }
 .pos-new-customer-fields input { width: 100%; }
+.pos-customer-match { grid-column: 1 / -1; margin: 0; padding: 9px 10px; border: 1px solid #cdebdc; border-radius: 7px; background: #f2fbf6; color: #246548; font-size: 12px; line-height: 1.5; }
 .pos-small-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .pos-totals { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid #edf0f4; }
 .pos-totals > div { display: flex; justify-content: space-between; color: #798493; font-size: 10px; }

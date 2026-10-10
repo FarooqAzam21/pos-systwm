@@ -15,10 +15,10 @@ export default function POS() {
   const [categoryId, setCategoryId] = useState('')
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
-  const [customers, setCustomers] = useState([])
   const [cart, setCart] = useState([])
   const [customerId, setCustomerId] = useState('')
-  const [customerMode, setCustomerMode] = useState('existing')
+  const [matchedCustomer, setMatchedCustomer] = useState(null)
+  const [customerLookupLoading, setCustomerLookupLoading] = useState(false)
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '', email: '' })
   const [discount, setDiscount] = useState('0')
   const [tax, setTax] = useState('0')
@@ -36,18 +36,46 @@ export default function POS() {
 
   useEffect(() => {
     let active = true
-    Promise.all([
-      inventoryService.getCategories(),
-      commerceService.getCustomers({ page: 1, limit: 200 }),
-    ]).then(([categoryList, customerList]) => {
+    inventoryService.getCategories().then((categoryList) => {
       if (active) {
         setCategories(categoryList)
-        setCustomers((customerList.items || []).filter((item) => item.is_active))
       }
     }).catch((error) => notify(getApiErrorMessage(error), 'error'))
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [notify])
+
+  useEffect(() => {
+    const phone = newCustomer.phone.trim()
+    const digits = phone.replace(/\D/g, '')
+    if (digits.length < 7) {
+      setCustomerLookupLoading(false)
+      return undefined
+    }
+    let active = true
+    const timer = window.setTimeout(async () => {
+      setCustomerLookupLoading(true)
+      try {
+        const result = await commerceService.getCustomers({ search: phone, page: 1, limit: 50 })
+        const match = (result.items || []).find((customer) => (
+          customer.is_active && customer.phone?.replace(/\D/g, '') === digits
+        ))
+        if (active && match) {
+          setCustomerId(match.id)
+          setMatchedCustomer(match)
+          setNewCustomer((current) => ({ ...current, name: match.name }))
+        }
+      } catch {
+        // A lookup failure must not block a new sale; checkout will report any save error.
+      } finally {
+        if (active) setCustomerLookupLoading(false)
+      }
+    }, 350)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [newCustomer.phone])
 
   useEffect(() => {
     let active = true
@@ -102,12 +130,12 @@ export default function POS() {
     setCheckingOut(true)
     try {
       const sale = await commerceService.createSale({
-        customer_id: customerMode === 'existing' ? customerId || null : null,
-        new_customer: customerMode === 'new' ? {
+        customer_id: customerId || null,
+        new_customer: customerId ? null : {
           name: newCustomer.name.trim(),
           phone: newCustomer.phone.trim() || null,
           email: newCustomer.email.trim() || null,
-        } : null,
+        },
         discount,
         tax,
         paid_amount: paid,
@@ -122,7 +150,7 @@ export default function POS() {
       notify(`Sale ${sale.invoice_number} completed.`)
       setCart([])
       setCustomerId('')
-      setCustomerMode('existing')
+      setMatchedCustomer(null)
       setNewCustomer({ name: '', phone: '', email: '' })
       setDiscount('0')
       setTax('0')
@@ -165,16 +193,12 @@ export default function POS() {
             <strong>{currency(Number(product.selling_price) * quantity - Number(lineDiscount || 0) + Number(lineTax || 0))}</strong><button type="button" className="icon-button-inline danger" aria-label={`Remove ${product.name}`} onClick={() => setQuantity(product.id, 0)}><Trash2 size={14} /></button>
           </div>)}</div>
           <div className="pos-checkout-fields">
-            <label>Customer<select value={customerMode === 'new' ? '__new__' : customerId} onChange={(event) => {
-              if (event.target.value === '__new__') {
-                setCustomerMode('new')
-                setCustomerId('')
-              } else {
-                setCustomerMode('existing')
-                setCustomerId(event.target.value)
-              }
-            }}><option value="">Walk-in customer</option>{customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.name}{Number(customer.current_balance) > 0 ? ` | Balance ${currency(customer.current_balance)}` : ''}</option>)}<option value="__new__">+ Add new customer</option></select></label>
-            {customerMode === 'new' && <div className="pos-new-customer-fields"><label>Customer name *<input required minLength="1" maxLength="160" autoComplete="name" value={newCustomer.name} onChange={(event) => setNewCustomer({ ...newCustomer, name: event.target.value })} placeholder="Full name" /></label><label>Phone (optional)<input type="tel" maxLength="40" autoComplete="tel" value={newCustomer.phone} onChange={(event) => setNewCustomer({ ...newCustomer, phone: event.target.value })} placeholder="Phone number" /></label><label>Email (optional)<input type="email" maxLength="320" autoComplete="email" value={newCustomer.email} onChange={(event) => setNewCustomer({ ...newCustomer, email: event.target.value })} placeholder="Email address" /></label></div>}
+            <div className="pos-new-customer-fields">
+              <label>Customer name *<input required minLength="1" maxLength="160" autoComplete="name" value={newCustomer.name} readOnly={Boolean(matchedCustomer)} onChange={(event) => setNewCustomer({ ...newCustomer, name: event.target.value })} placeholder="Full name" /></label>
+              <label>Phone number *<input required type="tel" minLength="7" maxLength="40" autoComplete="tel" value={newCustomer.phone} onChange={(event) => { setCustomerId(''); setMatchedCustomer(null); setNewCustomer((current) => ({ ...current, name: matchedCustomer ? '' : current.name, phone: event.target.value })) }} placeholder="Enter customer phone" />{customerLookupLoading && <small>Checking customer…</small>}</label>
+              <label>Email (optional)<input type="email" maxLength="320" autoComplete="email" value={newCustomer.email} onChange={(event) => setNewCustomer({ ...newCustomer, email: event.target.value })} placeholder="Email address" /></label>
+              {matchedCustomer && <p className="pos-customer-match">Returning customer found: <strong>{matchedCustomer.name}</strong>. This sale will be saved to their existing customer record.</p>}
+            </div>
             <div className="pos-small-fields">
               <label>Order discount<input type="number" min="0" step="0.01" max={Math.max(0, subtotal - lineDiscounts)} value={discount} onChange={(event) => setDiscount(event.target.value)} /></label>
               <label>Tax<input type="number" min="0" step="0.01" value={tax} onChange={(event) => setTax(event.target.value)} /></label>
