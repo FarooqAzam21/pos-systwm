@@ -75,7 +75,7 @@ npm install
 npm run dev
 ```
 
-Vite runs at `http://localhost:5173`. The deployed Vercel project must have `VITE_API_URL` set to the public URL of this project's API; the frontend URL itself is not an API URL. Set `VITE_API_URL` in root `.env` for local builds and restart Vite.
+Vite runs at `http://localhost:5173`. In Vercel, set `VITE_API_URL` to `https://theorvion-pos-syst3m.onrender.com` and redeploy. In Render, set `FRONTEND_ORIGINS` to `https://pos-systwm.vercel.app,http://localhost:5173`. Set `VITE_API_URL` in root `.env` for local builds and restart Vite.
 
 ## Authentication and tenant isolation
 

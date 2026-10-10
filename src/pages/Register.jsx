@@ -30,7 +30,7 @@ export default function Register() {
     try {
       await register({ ...form, name: form.owner_name })
       notify('Your business workspace is ready.')
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       notify(getApiErrorMessage(error), 'error')
     } finally {

@@ -5,7 +5,7 @@ import { useAuth } from '../context/useAuth'
 import { useToast } from '../context/useToast'
 
 const links = [
-  { label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true },
+  { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
   { label: 'POS', to: '/pos', icon: ShoppingCart },
   { label: 'Sales', to: '/sales', icon: CircleDollarSign },
   { label: 'Returns', to: '/returns', icon: RotateCcw },

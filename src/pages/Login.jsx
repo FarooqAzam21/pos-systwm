@@ -18,7 +18,7 @@ export default function Login() {
     setSubmitting(true)
     try {
       await login(form)
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       notify(getApiErrorMessage(error), 'error')
     } finally {

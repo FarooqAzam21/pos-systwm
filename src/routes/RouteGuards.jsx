@@ -11,11 +11,11 @@ export function ProtectedRoute() {
 export function PublicRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingState />
-  return user ? <Navigate to="/" replace /> : children
+  return user ? <Navigate to="/dashboard" replace /> : children
 }
 
 export function RoleGuard({ roles }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingState label="Checking permissions…" />
-  return roles.includes(user?.role) ? <Outlet /> : <Navigate to="/" replace />
+  return roles.includes(user?.role) ? <Outlet /> : <Navigate to="/dashboard" replace />
 }

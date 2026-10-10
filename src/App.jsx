@@ -33,6 +33,7 @@ import { ProtectedRoute, PublicRoute, RoleGuard } from './routes/RouteGuards'
 import './App.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
 
 function App() {
   return (
@@ -40,11 +41,12 @@ function App() {
       <AuthProvider>
         <ToastProvider>
           <Routes>
+            <Route path="/" element={<Suspense fallback={<LoadingState label="Loading The Orvion POS…" />}><LandingPage /></Suspense>} />
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             <Route element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
-                <Route index element={<Suspense fallback={<LoadingState label="Loading dashboard…" />}><Dashboard /></Suspense>} />
+                <Route path="dashboard" element={<Suspense fallback={<LoadingState label="Loading dashboard…" />}><Dashboard /></Suspense>} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="pos" element={<POS />} />
                 <Route path="sales" element={<Sales />} />
@@ -76,7 +78,7 @@ function App() {
                   <Route path="users" element={<Users />} />
                   <Route path="audit-logs" element={<AuditLogs />} />
                 </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Route>
             </Route>
           </Routes>
