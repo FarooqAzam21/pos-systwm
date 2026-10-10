@@ -6,7 +6,8 @@ const cleanParams = (params) => Object.fromEntries(
 
 export const commerceService = {
   async getCustomers(params = {}) {
-    return (await api.get('/customers', { params: cleanParams(params) })).data
+    // Render's free backend can take about a minute to wake after idle time.
+    return (await api.get('/customers', { params: cleanParams(params), timeout: 65000 })).data
   },
   async getCustomer(id) {
     return (await api.get(`/customers/${id}`)).data
