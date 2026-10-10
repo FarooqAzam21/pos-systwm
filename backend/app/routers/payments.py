@@ -14,9 +14,9 @@ from app.models.sale import Sale
 from app.models.supplier import Supplier
 from app.models.user import User, UserRole
 from app.models.user import User as Account
-from app.schemas.commerce import CustomerPaymentCreate, SupplierPaymentCreate
+from app.schemas.commerce import CustomerPaymentCreate, SalePaymentCreate, SupplierPaymentCreate
 from app.schemas.commerce import PaymentRead
-from app.services.commerce import create_customer_payment, create_supplier_payment
+from app.services.commerce import create_customer_payment, create_sale_payment, create_supplier_payment
 from app.services.audit import record_audit
 from app.services.dates import business_datetime_bounds
 
@@ -112,6 +112,30 @@ def receive_customer_payment(payload: CustomerPaymentCreate, user: User = Depend
         for record in records:
             db.refresh(record)
         return records
+    except Exception:
+        db.rollback()
+        raise
+
+
+@router.post("/sale", status_code=201)
+def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+    try:
+        payment = create_sale_payment(db, user, payload)
+        record_audit(
+            db, user.business_id, user.id, "create", "sale_payment",
+            payment.id, f"Received sale payment of {payment.amount}",
+        )
+        db.commit()
+        db.refresh(payment)
+        return {
+            "id": payment.id,
+            "sale_id": payload.sale_id,
+            "amount": payment.amount,
+            "payment_method": payment.payment_method.value,
+            "payment_date": payment.payment_date,
+            "reference_number": payment.reference_number,
+            "notes": payment.notes,
+        }
     except Exception:
         db.rollback()
         raise

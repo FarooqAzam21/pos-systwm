@@ -139,6 +139,15 @@ class CustomerPaymentCreate(BaseModel):
     notes: str | None = None
 
 
+class SalePaymentCreate(BaseModel):
+    sale_id: UUID
+    amount: Decimal = Field(gt=0, max_digits=12, decimal_places=2)
+    payment_method: PaymentMethod
+    payment_date: datetime | None = None
+    reference_number: str | None = Field(default=None, max_length=100)
+    notes: str | None = None
+
+
 class SupplierPaymentCreate(BaseModel):
     purchase_id: UUID
     amount: Decimal = Field(gt=0, max_digits=12, decimal_places=2)

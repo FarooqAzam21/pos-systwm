@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Download, Printer, RotateCcw } from 'lucide-react'
+import { ArrowLeft, CreditCard, Download, Printer, RotateCcw } from 'lucide-react'
 import { commerceService } from '../services/commerceService'
 import { businessService } from '../services/businessService'
 import { getApiErrorMessage } from '../services/api'
@@ -24,6 +24,9 @@ export default function SaleDetails() {
   const [returnMethod, setReturnMethod] = useState('cash')
   const [returning, setReturning] = useState(false)
   const [downloading, setDownloading] = useState(false)
+  const [showPayment, setShowPayment] = useState(false)
+  const [payment, setPayment] = useState({ amount: '', payment_method: 'cash', reference_number: '', notes: '' })
+  const [savingPayment, setSavingPayment] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -56,6 +59,22 @@ export default function SaleDetails() {
     }
   }
 
+  async function submitPayment(event) {
+    event.preventDefault()
+    setSavingPayment(true)
+    try {
+      await commerceService.receiveSalePayment({ ...payment, sale_id: saleId })
+      notify('Sale payment recorded.')
+      setShowPayment(false)
+      setPayment({ amount: '', payment_method: 'cash', reference_number: '', notes: '' })
+      setReload((value) => value + 1)
+    } catch (error) {
+      notify(getApiErrorMessage(error), 'error')
+    } finally {
+      setSavingPayment(false)
+    }
+  }
+
   async function downloadInvoice() {
     setDownloading(true)
     try {
@@ -79,7 +98,7 @@ export default function SaleDetails() {
   return (
     <div className="commerce-page invoice-page">
       <div className="page-heading sale-actions"><div><Link className="back-link" to="/sales"><ArrowLeft size={14} />Sales</Link><span className="eyebrow">SALE INVOICE</span><h1>{sale.invoice_number}</h1><p>{new Date(sale.sale_date).toLocaleString()} · {sale.status}</p></div>
-        <div className="sale-action-buttons"><button className="ghost-button" onClick={() => window.print()}><Printer size={15} />Print invoice</button><button className="ghost-button" disabled={downloading} onClick={downloadInvoice}><Download size={15} />{downloading ? 'Preparing PDF…' : 'Download PDF'}</button>{canManageReturns && sale.status !== 'returned' && sale.status !== 'voided' && <button className="primary-button" onClick={() => setShowReturn(true)}><RotateCcw size={15} />Return items</button>}</div>
+        <div className="sale-action-buttons">{Number(sale.outstanding_amount) > 0 && sale.status !== 'voided' && <button className="primary-button" onClick={() => { setPayment({ ...payment, amount: String(sale.outstanding_amount) }); setShowPayment(true) }}><CreditCard size={15} />Receive payment</button>}<button className="ghost-button" onClick={() => window.print()}><Printer size={15} />Print invoice</button><button className="ghost-button" disabled={downloading} onClick={downloadInvoice}><Download size={15} />{downloading ? 'Preparing PDF…' : 'Download PDF'}</button>{canManageReturns && sale.status !== 'returned' && sale.status !== 'voided' && <button className="primary-button" onClick={() => setShowReturn(true)}><RotateCcw size={15} />Return items</button>}</div>
       </div>
       <article className="panel print-invoice invoice-card">
         <div className="invoice-heading"><div><span className="eyebrow">INVOICE</span><h2>{business?.business_name || user?.business_name}</h2><p>{business?.address || ''}{business?.phone ? ` · ${business.phone}` : ''}</p><p>{business?.email || ''}</p></div><div><strong>{sale.invoice_number}</strong><span>{new Date(sale.sale_date).toLocaleString()}</span><span>Cashier: {sale.cashier_name || user?.name}</span></div></div>
@@ -93,6 +112,17 @@ export default function SaleDetails() {
         </div>
       </article>
       {!!sale.returns?.length && <section className="panel commerce-panel"><div className="panel-heading"><div><h2>Returns</h2></div></div><div className="data-table"><table><thead><tr><th>Date</th><th>Refund</th><th>Notes</th></tr></thead><tbody>{sale.returns.map((item) => <tr key={item.id}><td>{new Date(item.created_at).toLocaleString()}</td><td>{amount(item.refund_amount)}</td><td>{item.notes || '—'}</td></tr>)}</tbody></table></div></section>}
+      {showPayment && <div className="modal-backdrop" onClick={() => setShowPayment(false)}><div className="modal-card" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-header"><h3>Receive sale payment</h3><button type="button" className="ghost-button" onClick={() => setShowPayment(false)}>Close</button></div>
+        <form className="inventory-form" onSubmit={submitPayment}>
+          <p>Outstanding balance: <strong>{amount(sale.outstanding_amount)}</strong></p>
+          <label>Amount received<input required type="number" min="0.01" max={sale.outstanding_amount} step="0.01" value={payment.amount} onChange={(event) => setPayment({ ...payment, amount: event.target.value })} /></label>
+          <label>Payment method<select value={payment.payment_method} onChange={(event) => setPayment({ ...payment, payment_method: event.target.value })}><option value="cash">Cash</option><option value="card">Card</option><option value="bank_transfer">Bank transfer</option><option value="mobile_wallet">Mobile wallet</option><option value="other">Other</option></select></label>
+          <label>Reference number<input value={payment.reference_number} maxLength="100" onChange={(event) => setPayment({ ...payment, reference_number: event.target.value })} /></label>
+          <label>Notes<textarea rows={2} value={payment.notes} onChange={(event) => setPayment({ ...payment, notes: event.target.value })} /></label>
+          <div className="modal-actions"><button type="button" className="ghost-button" onClick={() => setShowPayment(false)}>Cancel</button><button className="primary-button" disabled={savingPayment}>{savingPayment ? 'Recording…' : 'Record payment'}</button></div>
+        </form>
+      </div></div>}
       {canManageReturns && showReturn && <div className="modal-backdrop" onClick={() => setShowReturn(false)}><div className="modal-card large" onClick={(event) => event.stopPropagation()}>
         <div className="modal-header"><h3>Return sale items</h3><button className="ghost-button" onClick={() => setShowReturn(false)}>Close</button></div>
         <form className="inventory-form" onSubmit={submitReturn}>

@@ -16,7 +16,7 @@ from app.models.sale_return import SaleReturn, SaleReturnItem
 from app.models.stock_movement import MovementType, StockMovement
 from app.models.supplier import Supplier
 from app.models.user import User
-from app.schemas.commerce import CustomerCreate, CustomerPaymentCreate, CustomerUpdate, PurchaseCreate, SaleCreate, SaleReturnCreate, SupplierPaymentCreate
+from app.schemas.commerce import CustomerCreate, CustomerPaymentCreate, CustomerUpdate, PurchaseCreate, SaleCreate, SalePaymentCreate, SaleReturnCreate, SupplierPaymentCreate
 from app.services.dates import business_datetime_bounds, get_business_timezone
 
 CENT = Decimal("0.01")
@@ -484,6 +484,60 @@ def create_customer_payment(db: Session, user: User, payload: CustomerPaymentCre
     customer.current_balance = money(Decimal(customer.current_balance) - amount)
     db.flush()
     return payments
+
+
+def create_sale_payment(db: Session, user: User, payload: SalePaymentCreate) -> Payment:
+    sale_scope = select(Sale).where(
+        Sale.id == payload.sale_id,
+        Sale.business_id == user.business_id,
+    )
+    sale = db.scalar(sale_scope)
+    if sale is None:
+        raise not_found("Sale")
+
+    # Customer payments lock customer before sales; keep the same lock order to
+    # avoid deadlocks when an account payment and invoice payment overlap.
+    customer = None
+    if sale.customer_id:
+        customer = db.scalar(
+            select(Customer).where(
+                Customer.id == sale.customer_id,
+                Customer.business_id == user.business_id,
+            ).with_for_update()
+        )
+    sale = db.scalar(sale_scope.with_for_update().execution_options(populate_existing=True))
+    if sale is None:
+        raise not_found("Sale")
+    if sale.status == SaleStatus.VOIDED:
+        raise HTTPException(status_code=422, detail="Cannot receive payment for a voided sale")
+
+    amount = money(payload.amount)
+    outstanding = Decimal(sale.outstanding_amount)
+    if amount > outstanding:
+        raise HTTPException(status_code=422, detail="Payment cannot exceed the sale outstanding balance")
+
+    if customer and customer.id == sale.customer_id:
+        customer.current_balance = money(max(ZERO, Decimal(customer.current_balance) - amount))
+
+    sale.paid_amount = money(Decimal(sale.paid_amount) + amount)
+    sale.outstanding_amount = money(outstanding - amount)
+    sale.payment_status = payment_status(Decimal(sale.paid_amount), Decimal(sale.total_amount))
+    payment = Payment(
+        business_id=user.business_id,
+        payment_type=PaymentType.INCOMING,
+        reference_type=PaymentReferenceType.SALE,
+        reference_id=str(sale.id),
+        customer_id=sale.customer_id,
+        amount=amount,
+        payment_method=payload.payment_method,
+        payment_date=payload.payment_date or datetime.now(timezone.utc),
+        reference_number=payload.reference_number,
+        notes=payload.notes,
+        received_by=user.id,
+    )
+    db.add(payment)
+    db.flush()
+    return payment
 
 
 def create_supplier_payment(db: Session, user: User, payload: SupplierPaymentCreate) -> Payment:

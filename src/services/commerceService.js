@@ -24,6 +24,9 @@ export const commerceService = {
   async receiveCustomerPayment(payload) {
     return (await api.post('/payments/customer', payload)).data
   },
+  async receiveSalePayment(payload) {
+    return (await api.post('/payments/sale', payload)).data
+  },
   async getPurchases(params = {}) {
     return (await api.get('/purchases', { params: cleanParams(params) })).data
   },

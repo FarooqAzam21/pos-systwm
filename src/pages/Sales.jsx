@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { CreditCard, Search } from 'lucide-react'
 import { commerceService } from '../services/commerceService'
 import { getApiErrorMessage } from '../services/api'
 import { useToast } from '../context/useToast'
@@ -42,9 +42,9 @@ export default function Sales() {
         <label className="date-field">To<input type="date" value={endDate} onChange={(event) => { setEndDate(event.target.value); setPage(1) }} /></label>
       </div>
       <section className="panel commerce-panel"><div className="data-table"><table>
-        <thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th><th>Paid</th><th>Outstanding</th>{canViewCosts && <><th>COGS</th><th>Gross profit</th></>}<th>Cashier</th><th>Status</th></tr></thead>
-        <tbody>{loading ? <tr><td colSpan={canViewCosts ? 10 : 8} className="empty-cell">Loading sales…</td></tr> : items.length === 0 ? <tr><td colSpan={canViewCosts ? 10 : 8} className="empty-cell">No sales match your filters.</td></tr> : items.map((sale) => <tr key={sale.id}>
-          <td><Link to={`/sales/${sale.id}`}><strong>{sale.invoice_number}</strong></Link></td><td>{sale.customer_name || 'Walk-in'}</td><td>{new Date(sale.sale_date).toLocaleString()}</td><td>{amount(sale.total_amount)}</td><td>{amount(sale.paid_amount)}</td><td>{amount(sale.outstanding_amount)}</td>{canViewCosts && <><td>{amount(sale.cogs_amount)}</td><td>{amount(sale.gross_profit)}</td></>}<td>{sale.cashier_name || '—'}</td><td><span className={`tag ${sale.payment_status === 'paid' ? 'success' : 'warning'}`}>{sale.payment_status}</span> <span className="tag neutral">{sale.status}</span></td>
+        <thead><tr><th>Invoice</th><th>Customer</th><th>Date</th><th>Total</th><th>Paid</th><th>Outstanding</th>{canViewCosts && <><th>COGS</th><th>Gross profit</th></>}<th>Cashier</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>{loading ? <tr><td colSpan={canViewCosts ? 11 : 9} className="empty-cell">Loading sales…</td></tr> : items.length === 0 ? <tr><td colSpan={canViewCosts ? 11 : 9} className="empty-cell">No sales match your filters.</td></tr> : items.map((sale) => <tr key={sale.id}>
+          <td><Link to={`/sales/${sale.id}`}><strong>{sale.invoice_number}</strong></Link></td><td>{sale.customer_name || 'Walk-in'}</td><td>{new Date(sale.sale_date).toLocaleString()}</td><td>{amount(sale.total_amount)}</td><td>{amount(sale.paid_amount)}</td><td>{amount(sale.outstanding_amount)}</td>{canViewCosts && <><td>{amount(sale.cogs_amount)}</td><td>{amount(sale.gross_profit)}</td></>}<td>{sale.cashier_name || '—'}</td><td><span className={`tag ${sale.payment_status === 'paid' ? 'success' : 'warning'}`}>{sale.payment_status}</span> <span className="tag neutral">{sale.status}</span></td><td>{Number(sale.outstanding_amount) > 0 && sale.status !== 'voided' ? <Link className="ghost-button small" to={`/sales/${sale.id}`} aria-label={`Receive payment for ${sale.invoice_number}`}><CreditCard size={14} />Receive</Link> : '—'}</td>
         </tr>)}</tbody>
       </table></div>
         {total > 20 && <div className="pagination-row"><button className="ghost-button" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>Previous</button><span>Page {page} of {pages}</span><button className="ghost-button" disabled={page >= pages} onClick={() => setPage((value) => value + 1)}>Next</button></div>}
