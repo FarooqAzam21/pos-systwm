@@ -66,7 +66,7 @@ def edit_customer(
         raise HTTPException(status_code=404, detail="Customer not found")
     if "current_balance" in payload.model_fields_set:
         raise HTTPException(status_code=422, detail="Customer balance is changed only by financial transactions")
-    update_customer(customer, payload)
+    update_customer(db, customer, payload)
     record_audit(db, user.business_id, user.id, "update", "customer", customer.id, f"Updated customer {customer.name}")
     db.commit()
     db.refresh(customer)

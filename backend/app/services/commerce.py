@@ -126,6 +126,11 @@ def serialize_return(record: SaleReturn) -> dict:
 
 
 def create_customer(db: Session, business_id, payload: CustomerCreate) -> Customer:
+    if payload.phone and db.scalar(select(Customer.id).where(
+        Customer.business_id == business_id,
+        Customer.phone == payload.phone,
+    )):
+        raise HTTPException(status_code=409, detail="A customer with this phone number already exists")
     customer = Customer(
         business_id=business_id,
         name=payload.name.strip(),
@@ -142,10 +147,18 @@ def create_customer(db: Session, business_id, payload: CustomerCreate) -> Custom
     return customer
 
 
-def update_customer(customer: Customer, payload: CustomerUpdate) -> Customer:
+def update_customer(db: Session, customer: Customer, payload: CustomerUpdate) -> Customer:
     values = payload.model_dump(exclude_unset=True)
     if "current_balance" in values:
         raise HTTPException(status_code=422, detail="Customer balance is changed only by financial transactions")
+    if values.get("phone"):
+        duplicate = db.scalar(select(Customer.id).where(
+            Customer.business_id == customer.business_id,
+            Customer.phone == values["phone"],
+            Customer.id != customer.id,
+        ))
+        if duplicate:
+            raise HTTPException(status_code=409, detail="A customer with this phone number already exists")
     for field, value in values.items():
         if field == "credit_limit" and value is not None:
             value = money(value)

@@ -160,7 +160,7 @@ python -m pytest
 python -m compileall -q app alembic tests
 ```
 
-Apply schema changes to the configured PostgreSQL database with `alembic upgrade head`.
+Apply schema changes to the configured PostgreSQL database with `alembic upgrade head`. Migration `0007` normalizes customer phones, consolidates records sharing a phone within a business, reattaches their sales/payments/audit references, preserves combined balances and adds a unique business-phone index. Apply it before deploying the API version that requires unique phone numbers.
 
 ## Optional Redis caching
 

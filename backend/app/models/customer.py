@@ -13,6 +13,7 @@ class Customer(Base):
     __tablename__ = "customers"
     __table_args__ = (
         Index("ix_customers_business_name", "business_id", "name"),
+        Index("uq_customers_business_phone", "business_id", "phone", unique=True),
         CheckConstraint("credit_limit >= 0 AND current_balance >= 0", name="ck_customers_balances_nonnegative"),
     )
 

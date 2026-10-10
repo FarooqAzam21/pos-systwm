@@ -195,7 +195,7 @@ export default function POS() {
           <div className="pos-checkout-fields">
             <div className="pos-new-customer-fields">
               <label>Customer name *<input required minLength="1" maxLength="160" autoComplete="name" value={newCustomer.name} readOnly={Boolean(matchedCustomer)} onChange={(event) => setNewCustomer({ ...newCustomer, name: event.target.value })} placeholder="Full name" /></label>
-              <label>Phone number *<input required type="tel" minLength="7" maxLength="40" autoComplete="tel" value={newCustomer.phone} onChange={(event) => { setCustomerId(''); setMatchedCustomer(null); setNewCustomer((current) => ({ ...current, name: matchedCustomer ? '' : current.name, phone: event.target.value })) }} placeholder="Enter customer phone" />{customerLookupLoading && <small>Checking customer…</small>}</label>
+              <label>Phone number *<input required type="tel" inputMode="numeric" minLength="7" maxLength="11" autoComplete="tel" value={newCustomer.phone} onChange={(event) => { setCustomerId(''); setMatchedCustomer(null); setNewCustomer((current) => ({ ...current, name: matchedCustomer ? '' : current.name, phone: event.target.value })) }} placeholder="Enter up to 11 digits" />{customerLookupLoading && <small>Checking customer…</small>}</label>
               <label>Email (optional)<input type="email" maxLength="320" autoComplete="email" value={newCustomer.email} onChange={(event) => setNewCustomer({ ...newCustomer, email: event.target.value })} placeholder="Email address" /></label>
               {matchedCustomer && <p className="pos-customer-match">Returning customer found: <strong>{matchedCustomer.name}</strong>. This sale will be saved to their existing customer record.</p>}
             </div>

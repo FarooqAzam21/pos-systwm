@@ -1,10 +1,22 @@
 from datetime import date, datetime
 from decimal import Decimal
+import re
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.payment import PaymentMethod
+
+
+def normalize_customer_phone(value: str | None) -> str | None:
+    if value is None or not value.strip():
+        return None
+    if re.search(r"[^0-9\s()+.-]", value):
+        raise ValueError("Phone number may contain only digits, spaces, +, parentheses, dots, or hyphens")
+    digits = re.sub(r"\D", "", value)
+    if len(digits) > 11:
+        raise ValueError("Phone number must not exceed 11 digits")
+    return digits or None
 
 
 class CustomerCreate(BaseModel):
@@ -16,6 +28,11 @@ class CustomerCreate(BaseModel):
     tax_number: str | None = Field(default=None, max_length=80)
     credit_limit: Decimal = Field(default=0, ge=0, max_digits=12, decimal_places=2)
     notes: str | None = None
+
+    @field_validator("phone")
+    @classmethod
+    def phone_must_be_unique_format(cls, value: str | None) -> str | None:
+        return normalize_customer_phone(value)
 
     @field_validator("name")
     @classmethod
@@ -38,6 +55,11 @@ class CustomerUpdate(BaseModel):
     is_active: bool | None = None
 
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("phone")
+    @classmethod
+    def phone_must_be_unique_format(cls, value: str | None) -> str | None:
+        return normalize_customer_phone(value)
 
 
 class CustomerRead(BaseModel):

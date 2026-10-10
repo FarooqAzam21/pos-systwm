@@ -108,7 +108,7 @@ export default function Customers() {
         <div className="modal-header"><h3>{editing ? 'Edit customer' : 'Add customer'}</h3><button className="ghost-button" onClick={() => setShowForm(false)}>Close</button></div>
         <form className="inventory-form two-column" onSubmit={submit}>
           <label>Name<input required maxLength="160" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-          <label>Phone<input maxLength="40" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
+          <label>Phone<input type="tel" inputMode="numeric" maxLength="11" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} /></label>
           <label>Email<input type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} /></label>
           <label>City<input value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} /></label>
           <label>Address<input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} /></label>

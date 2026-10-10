@@ -47,7 +47,31 @@ def test_customer_list_serializes_customer_models(client):
     assert response.status_code == 200, response.text
     assert response.json()["total"] == 1
     assert response.json()["items"][0]["name"] == "Jordan Customer"
-    assert response.json()["items"][0]["phone"] == "555-0199"
+    assert response.json()["items"][0]["phone"] == "5550199"
+
+
+def test_customer_phone_is_normalized_unique_and_limited_to_11_digits(client):
+    auth = headers(register(client, "Customer Phone Store", "Casey Owner", "customer-phone@commerce.test"))
+    first = client.post("/customers", headers=auth, json={
+        "name": "Jordan Customer", "phone": "0318-946-5018",
+    })
+    assert first.status_code == 201, first.text
+    assert first.json()["phone"] == "03189465018"
+
+    duplicate = client.post("/customers", headers=auth, json={
+        "name": "Jordan Again", "phone": "03189465018",
+    })
+    assert duplicate.status_code == 409, duplicate.text
+
+    too_long = client.post("/customers", headers=auth, json={
+        "name": "Too Long", "phone": "033431238970",
+    })
+    assert too_long.status_code == 422, too_long.text
+
+    second = client.post("/customers", headers=auth, json={"name": "Other Customer", "phone": "03001234567"})
+    assert second.status_code == 201, second.text
+    conflict_update = client.put(f"/customers/{second.json()['id']}", headers=auth, json={"phone": "0318 946 5018"})
+    assert conflict_update.status_code == 409, conflict_update.text
 
 
 def test_purchase_checkout_payment_return_and_dashboard(client):
