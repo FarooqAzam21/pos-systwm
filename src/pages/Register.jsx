@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, Eye, EyeOff, Store } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useToast } from '../context/useToast'
 import { getApiErrorMessage } from '../services/api'
 import PasswordRequirements, { isStrongPassword } from '../components/PasswordRequirements'
+import BrandLogo from '../components/BrandLogo'
 
 export default function Register() {
   const [form, setForm] = useState({ business_name: '', owner_name: '', email: '', password: '', confirm_password: '' })
@@ -41,7 +42,7 @@ export default function Register() {
   return (
     <main className="auth-screen">
       <section className="auth-card register-card">
-        <Link className="auth-brand" to="/"><span className="brand-mark"><Store size={19} /></span>Northstar<span className="brand-accent">.</span></Link>
+        <Link className="auth-brand" to="/" aria-label="The Orvion POS home"><BrandLogo className="auth-brand-logo" /></Link>
         <div className="auth-heading"><span className="eyebrow">GET STARTED</span><h1>Create your business workspace</h1><p>Your business and owner account will be created together.</p></div>
         <form onSubmit={submit} className="auth-form">
           <label>Business name<input autoComplete="organization" required minLength="2" maxLength="160" value={form.business_name} onChange={(event) => setForm({ ...form, business_name: event.target.value })} placeholder="Northstar Market" /></label>
@@ -53,7 +54,7 @@ export default function Register() {
         </form>
         <p className="auth-switch">Already have a workspace? <Link to="/login">Sign in</Link></p>
       </section>
-      <aside className="auth-aside"><div className="auth-aside-mark"><Store size={22} /></div><div><span>ONE WORKSPACE FOR YOUR BUSINESS</span><h2>A better foundation for your everyday business.</h2><p>Start with a private workspace for your business and build on it as you grow.</p></div><small>Your account is securely protected</small></aside>
+      <aside className="auth-aside"><BrandLogo className="auth-aside-logo" /><div><span>ONE WORKSPACE FOR YOUR BUSINESS</span><h2>A better foundation for your everyday business.</h2><p>Start with a private workspace for your business and build on it as you grow.</p></div><small>Your account is securely protected</small></aside>
     </main>
   )
 }

@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowRight, Eye, EyeOff, Store } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useToast } from '../context/useToast'
 import { getApiErrorMessage } from '../services/api'
+import BrandLogo from '../components/BrandLogo'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -29,7 +30,7 @@ export default function Login() {
   return (
     <main className="auth-screen">
       <section className="auth-card">
-        <Link className="auth-brand" to="/"><span className="brand-mark"><Store size={19} /></span>Northstar<span className="brand-accent">.</span></Link>
+        <Link className="auth-brand" to="/" aria-label="The Orvion POS home"><BrandLogo className="auth-brand-logo" /></Link>
         <div className="auth-heading"><span className="eyebrow">WELCOME BACK</span><h1>Sign in to your workspace</h1><p>Manage your business from one clear, connected place.</p></div>
         <form onSubmit={submit} className="auth-form">
           <label>Email address<input type="email" autoComplete="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="you@business.com" /></label>
@@ -38,7 +39,7 @@ export default function Login() {
         </form>
         <p className="auth-switch">New to Northstar? <Link to="/register">Create your workspace</Link></p>
       </section>
-      <aside className="auth-aside"><div className="auth-aside-mark"><Store size={22} /></div><div><span>THE BUSINESS WORKSPACE</span><h2>Run your store with a little more clarity.</h2><p>A thoughtful foundation for managing your business, team, and day-to-day operations.</p></div><small>Secure workspace access · Built for growing businesses</small></aside>
+      <aside className="auth-aside"><BrandLogo className="auth-aside-logo" /><div><span>THE BUSINESS WORKSPACE</span><h2>Run your store with a little more clarity.</h2><p>A thoughtful foundation for managing your business, team, and day-to-day operations.</p></div><small>Secure workspace access · Built for growing businesses</small></aside>
     </main>
   )
 }

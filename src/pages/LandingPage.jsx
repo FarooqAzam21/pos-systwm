@@ -4,6 +4,7 @@ import {
   Check, ChevronDown, CreditCard, Menu, PackageCheck, ReceiptText, Settings2,
   ShieldCheck, ShoppingCart, Store, Users, Wallet, X,
 } from 'lucide-react'
+import BrandLogo from '../components/BrandLogo'
 import './LandingPage.css'
 
 const APP_LOGIN = 'https://pos-systwm.vercel.app/login'
@@ -46,15 +47,14 @@ const faqs = [
 
 function Brand({ footer = false }) {
   return <a className={`orvion-brand${footer ? ' footer-brand' : ''}`} href="#top" aria-label="The Orvion POS home">
-    <span className="orvion-symbol" aria-hidden="true"><span /></span>
-    <span className="orvion-wordmark"><strong>ORVION</strong><small>BUSINESS SYSTEMS</small></span>
+    <BrandLogo className="orvion-logo" />
   </a>
 }
 
 function DashboardPreview({ large = false }) {
   return <div className={`preview-frame${large ? ' preview-frame-large' : ''}`} aria-label="Illustrative preview of the POS dashboard">
     <div className="preview-sidebar">
-      <div className="preview-side-brand"><span className="preview-mini-mark">O</span><b>orvion</b></div>
+      <div className="preview-side-brand"><BrandLogo className="preview-mini-logo" /><b>orvion</b></div>
       <span className="preview-nav-label">WORKSPACE</span>
       <span className="preview-nav active"><span>⌂</span> Dashboard</span>
       <span className="preview-nav"><span>▣</span> Point of sale</span>

@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { Bell, Boxes, ChartNoAxesColumn, ChevronDown, CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard, Menu, PanelLeftClose, RotateCcw, Settings as SettingsIcon, ShieldCheck, ShoppingCart, Store, Truck, Users, Wallet, X } from 'lucide-react'
+import { Bell, Boxes, ChartNoAxesColumn, ChevronDown, CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard, Menu, PanelLeftClose, RotateCcw, Settings as SettingsIcon, ShieldCheck, ShoppingCart, Truck, Users, Wallet, X } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useToast } from '../context/useToast'
+import BrandLogo from '../components/BrandLogo'
 
 const links = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
@@ -47,8 +48,8 @@ export default function DashboardLayout() {
     <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
       <aside className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="brand">
-          <span className="brand-mark"><Store size={19} /></span>
-          {!collapsed && <span className="brand-name">Northstar<span>.</span></span>}
+          <span className="brand-mark"><BrandLogo className="brand-logo" /></span>
+          {!collapsed && <span className="brand-name">The Orvion<span>.</span></span>}
           <button className="mobile-close icon-button" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X size={18} /></button>
         </div>
         <div className="workspace-switcher">

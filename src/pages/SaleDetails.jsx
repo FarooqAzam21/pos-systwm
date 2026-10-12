@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../services/api'
 import { useToast } from '../context/useToast'
 import { useAuth } from '../context/useAuth'
 import { formatCurrency } from '../utils/formatters'
+import BrandLogo, { ORVION_LOGO_URL } from '../components/BrandLogo'
 
 const amount = formatCurrency
 
@@ -101,7 +102,7 @@ export default function SaleDetails() {
         <div className="sale-action-buttons">{Number(sale.outstanding_amount) > 0 && sale.status !== 'voided' && <button className="primary-button" onClick={() => { setPayment({ ...payment, amount: String(sale.outstanding_amount) }); setShowPayment(true) }}><CreditCard size={15} />Receive payment</button>}<button className="ghost-button" onClick={() => window.print()}><Printer size={15} />Print invoice</button><button className="ghost-button" disabled={downloading} onClick={downloadInvoice}><Download size={15} />{downloading ? 'Preparing PDF…' : 'Download PDF'}</button>{canManageReturns && sale.status !== 'returned' && sale.status !== 'voided' && <button className="primary-button" onClick={() => setShowReturn(true)}><RotateCcw size={15} />Return items</button>}</div>
       </div>
       <article className="panel print-invoice invoice-card">
-        <div className="invoice-heading"><div><span className="eyebrow">INVOICE</span><h2>{business?.business_name || user?.business_name}</h2><p>{business?.address || ''}{business?.phone ? ` · ${business.phone}` : ''}</p><p>{business?.email || ''}</p></div><div><strong>{sale.invoice_number}</strong><span>{new Date(sale.sale_date).toLocaleString()}</span><span>Cashier: {sale.cashier_name || user?.name}</span></div></div>
+        <div className="invoice-heading"><div><BrandLogo src={business?.logo || ORVION_LOGO_URL} className="invoice-brand-logo" /><span className="eyebrow">INVOICE</span><h2>{business?.business_name || user?.business_name}</h2><p>{business?.address || ''}{business?.phone ? ` · ${business.phone}` : ''}</p><p>{business?.email || ''}</p></div><div><strong>{sale.invoice_number}</strong><span>{new Date(sale.sale_date).toLocaleString()}</span><span>Cashier: {sale.cashier_name || user?.name}</span></div></div>
         <div className="invoice-customer"><span>Customer</span><strong>{sale.customer_name || 'Walk-in customer'}</strong>{sale.customer_phone && <span>{sale.customer_phone}</span>}{sale.customer_address && <span>{sale.customer_address}</span>}{sale.customer_id && <Link to={`/customers/${sale.customer_id}`}>View account</Link>}</div>
         <div className="data-table invoice-items"><table><thead><tr><th>Product</th><th>SKU</th><th>Qty</th><th>Unit price</th><th>Discount</th><th>Tax</th><th>Line total</th></tr></thead><tbody>
           {sale.items.map((item) => <tr key={item.id}><td>{item.product_name}{Number(item.returned_quantity) > 0 && <small className="returned-note">Returned {item.returned_quantity}</small>}</td><td>{item.sku}</td><td>{item.quantity}</td><td>{amount(item.unit_price)}</td><td>{amount(item.discount)}</td><td>{amount(item.tax)}</td><td>{amount(item.line_total)}</td></tr>)}
