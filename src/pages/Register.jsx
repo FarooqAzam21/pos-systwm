@@ -8,7 +8,7 @@ import PasswordRequirements, { isStrongPassword } from '../components/PasswordRe
 import BrandLogo from '../components/BrandLogo'
 
 export default function Register() {
-  const [form, setForm] = useState({ business_name: '', owner_name: '', email: '', password: '', confirm_password: '' })
+  const [form, setForm] = useState({ business_name: '', logo: '', owner_name: '', email: '', password: '', confirm_password: '' })
   const [submitting, setSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -42,10 +42,11 @@ export default function Register() {
   return (
     <main className="auth-screen">
       <section className="auth-card register-card">
-        <Link className="auth-brand" to="/" aria-label="The Orvion POS home"><BrandLogo className="auth-brand-logo" /></Link>
+        <Link className="auth-brand" to="/" aria-label="The Orvion POS home"><BrandLogo className="auth-brand-logo" /><span className="auth-brand-name">The Orvion<small>POS</small></span></Link>
         <div className="auth-heading"><span className="eyebrow">GET STARTED</span><h1>Create your business workspace</h1><p>Your business and owner account will be created together.</p></div>
         <form onSubmit={submit} className="auth-form">
-          <label>Business name<input autoComplete="organization" required minLength="2" maxLength="160" value={form.business_name} onChange={(event) => setForm({ ...form, business_name: event.target.value })} placeholder="Northstar Market" /></label>
+          <label>Business name<input autoComplete="organization" required minLength="2" maxLength="160" value={form.business_name} onChange={(event) => setForm({ ...form, business_name: event.target.value })} placeholder="Your business name" /></label>
+          <label>Business logo URL <span className="field-help">Optional. This logo will appear in your workspace and on invoices.</span><input type="url" maxLength="2048" value={form.logo} onChange={(event) => setForm({ ...form, logo: event.target.value })} placeholder="https://example.com/your-logo.png" /></label>
           <label>Owner name<input autoComplete="name" required minLength="2" maxLength="120" value={form.owner_name} onChange={(event) => setForm({ ...form, owner_name: event.target.value })} placeholder="Your full name" /></label>
           <label>Email address<input type="email" autoComplete="email" required value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="you@business.com" /></label>
           <div className="auth-form-row"><label>Password<span className="password-field"><input type={showPassword ? 'text' : 'password'} autoComplete="new-password" required minLength="10" maxLength="128" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Create a strong password" /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></span></label><label>Confirm password<span className="password-field"><input type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" required minLength="10" maxLength="128" value={form.confirm_password} onChange={(event) => setForm({ ...form, confirm_password: event.target.value })} placeholder="Repeat password" /><button type="button" aria-label={showConfirmPassword ? 'Hide password' : 'Show password'} onClick={() => setShowConfirmPassword((value) => !value)}>{showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></span></label></div>

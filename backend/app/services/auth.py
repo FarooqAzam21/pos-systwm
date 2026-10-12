@@ -24,6 +24,7 @@ def register_business_owner(payload: RegisterRequest, db: Session) -> User:
 
     business = Business(
         business_name=payload.business_name.strip(),
+        logo=payload.logo.strip() if payload.logo else None,
         owner_name=payload.owner_name.strip(),
         email=payload.email,
     )

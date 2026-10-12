@@ -22,13 +22,13 @@ html:has(.landing) { scroll-behavior: smooth; }
 .landing-header { height: 78px; border-bottom: 1px solid rgba(215, 228, 248, .1); position: relative; z-index: 5; }
 .landing-nav-wrap { width: min(1240px, calc(100% - 64px)); height: 100%; margin: auto; display: flex; align-items: center; justify-content: space-between; }
 .orvion-brand { display: inline-flex; align-items: center; gap: 11px; color: #f7f9ff; }
-.orvion-logo { display: block; width: 151px; height: 42px; padding: 3px 7px; border-radius: 7px; background: #fff; object-fit: contain; }
+.orvion-logo { display: block; width: 40px; height: 40px; flex: 0 0 40px; border: 1px solid rgba(255,255,255,.22); border-radius: 7px; object-fit: contain; }
 .orvion-symbol span { width: 13px; height: 13px; border: 2px solid #a8bcff; border-radius: 50%; position: relative; }
 .orvion-symbol span::after { content: ''; position: absolute; width: 5px; height: 5px; right: -3px; bottom: -3px; border: 1.5px solid #83d5dc; background: #0a1424; border-radius: 50%; }
 .orvion-wordmark { display: grid; gap: 0; line-height: 1; }
 .orvion-wordmark strong { font: 750 14px/1.2 'Manrope', sans-serif; letter-spacing: .17em; }
 .orvion-wordmark small { margin-top: 3px; color: #91a1b9; font-size: 7px; font-weight: 600; letter-spacing: .19em; }
-.preview-mini-logo { display: block; width: 17px; height: 17px; border-radius: 4px; object-fit: contain; }
+.preview-mini-logo { display: block; width: 22px; height: 22px; border-radius: 4px; object-fit: contain; }
 .landing-nav { display: flex; height: 100%; align-items: center; gap: 34px; }
 .landing-nav > a { color: #bac5d7; font-size: 12px; transition: color .18s ease; }
 .landing-nav > a:hover { color: #fff; }

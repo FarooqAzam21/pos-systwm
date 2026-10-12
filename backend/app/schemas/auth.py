@@ -28,6 +28,7 @@ def validate_strong_password(value: str) -> str:
 
 class RegisterRequest(BaseModel):
     business_name: str = Field(min_length=2, max_length=160)
+    logo: str | None = Field(default=None, max_length=2048)
     owner_name: str = Field(min_length=2, max_length=120)
     email: str
     password: str = Field(min_length=10, max_length=128)

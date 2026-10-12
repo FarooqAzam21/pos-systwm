@@ -48,6 +48,7 @@ const faqs = [
 function Brand({ footer = false }) {
   return <a className={`orvion-brand${footer ? ' footer-brand' : ''}`} href="#top" aria-label="The Orvion POS home">
     <BrandLogo className="orvion-logo" />
+    <span className="orvion-wordmark"><strong>THE ORVION</strong><small>POINT OF SALE</small></span>
   </a>
 }
 

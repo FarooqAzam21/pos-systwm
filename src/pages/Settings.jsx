@@ -46,6 +46,7 @@ export default function Settings() {
       })
       setBusiness({ ...emptyBusiness, ...updated, logo: updated.logo || '' })
       localStorage.setItem(CURRENCY_KEY, updated.currency || 'USD')
+      window.dispatchEvent(new Event('business-profile-updated'))
       notify('Business profile updated.')
     } catch (error) {
       notify(getApiErrorMessage(error), 'error')
@@ -96,7 +97,7 @@ export default function Settings() {
             <label>Timezone<select disabled={!canManageBusiness} value={business.timezone} onChange={(event) => setBusiness({ ...business, timezone: event.target.value })}><option value="UTC">UTC</option><option value="America/New_York">America/New_York</option><option value="America/Chicago">America/Chicago</option><option value="America/Denver">America/Denver</option><option value="America/Los_Angeles">America/Los_Angeles</option><option value="Europe/London">Europe/London</option><option value="Europe/Paris">Europe/Paris</option><option value="Asia/Karachi">Asia/Karachi</option><option value="Asia/Kolkata">Asia/Kolkata</option><option value="Asia/Tokyo">Asia/Tokyo</option><option value="Australia/Sydney">Australia/Sydney</option></select></label>
             <label>Invoice prefix<input required minLength="1" maxLength="20" disabled={!canManageBusiness} value={business.invoice_prefix} onChange={(event) => setBusiness({ ...business, invoice_prefix: event.target.value })} /></label>
             <label className="field-span-2">Invoice footer<textarea rows={2} maxLength="500" disabled={!canManageBusiness} value={business.invoice_footer} onChange={(event) => setBusiness({ ...business, invoice_footer: event.target.value })} placeholder="Optional note printed at the bottom of invoices" /></label>
-            <label className="field-span-2">Logo URL<input type="url" maxLength="2048" disabled={!canManageBusiness} value={business.logo} onChange={(event) => setBusiness({ ...business, logo: event.target.value })} placeholder="https://example.com/logo.png" /></label>
+            <label className="field-span-2">Business logo URL <span className="field-help">This logo appears in your dashboard and invoices.</span><input type="url" maxLength="2048" disabled={!canManageBusiness} value={business.logo} onChange={(event) => setBusiness({ ...business, logo: event.target.value })} placeholder="https://example.com/logo.png" /></label>
           </div>
           {canManageBusiness && <div className="settings-form-footer"><span>Changes apply to this business workspace.</span><button className="primary-button" disabled={savingBusiness}>{savingBusiness ? <><span className="button-spinner" />Saving…</> : <><Check size={16} />Save business profile</>}</button></div>}
         </form>

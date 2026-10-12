@@ -40,7 +40,6 @@ from app.services.commerce import (
 from app.services.audit import record_audit
 
 router = APIRouter(tags=["Sales"])
-ORVION_LOGO_URL = "https://www.theorvion.io/assets/logo.png"
 
 
 class _NoRedirectHandler(HTTPRedirectHandler):
@@ -115,7 +114,7 @@ def download_invoice_pdf(
         business.address if business else None,
         business.city if business else None,
     ]))
-    logo_data = _fetch_invoice_logo((business.logo if business and business.logo else ORVION_LOGO_URL))
+    logo_data = _fetch_invoice_logo(business.logo if business else None)
     logo = Image(logo_data, width=0.52 * inch, height=0.52 * inch, kind="proportional") if logo_data else Paragraph(escape("".join(part[0] for part in business_name.split()[:2]).upper() or "CO"), styles["LogoInitials"])
     details = "<br/>".join(filter(None, [escape(contact), f"Tax number: {escape(business.tax_number)}" if business and business.tax_number else ""])) or "&nbsp;"
     brand = Table([[Paragraph("BUSINESS", styles["MetaLabel"])], [Paragraph(escape(business_name), styles["BrandName"])], [Paragraph(details, styles["BrandDetails"])]])

@@ -1,9 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { Bell, Boxes, ChartNoAxesColumn, ChevronDown, CircleDollarSign, ClipboardList, CreditCard, LayoutDashboard, Menu, PanelLeftClose, RotateCcw, Settings as SettingsIcon, ShieldCheck, ShoppingCart, Truck, Users, Wallet, X } from 'lucide-react'
 import { useAuth } from '../context/useAuth'
 import { useToast } from '../context/useToast'
-import BrandLogo from '../components/BrandLogo'
+import { businessService } from '../services/businessService'
+
+function WorkspaceLogo({ logo, name, className }) {
+  const initials = name?.trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'B'
+  return <span className={`${className} workspace-logo-fallback`} aria-label={`${name || 'Business'} logo`}>
+    {initials}
+    {logo && <img className="workspace-logo-image" src={logo} alt="" onError={(event) => event.currentTarget.remove()} />}
+  </span>
+}
 
 const links = [
   { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard, end: true },
@@ -26,11 +34,19 @@ export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [business, setBusiness] = useState(null)
   const { user, logout } = useAuth()
   const { notify } = useToast()
   const managerRoles = ['Owner', 'Admin', 'Manager']
   const isManager = managerRoles.includes(user?.role)
   const isAdmin = ['Owner', 'Admin'].includes(user?.role)
+  useEffect(() => {
+    let active = true
+    const loadBusiness = () => businessService.get().then((data) => { if (active) setBusiness(data) }).catch(() => {})
+    loadBusiness()
+    window.addEventListener('business-profile-updated', loadBusiness)
+    return () => { active = false; window.removeEventListener('business-profile-updated', loadBusiness) }
+  }, [])
   const visibleLinks = links.filter(({ label }) => {
     if (['Expenses', 'Payments', 'Purchases', 'Suppliers', 'Inventory', 'Returns', 'Reports'].includes(label)) return isManager
     if (label === 'Users') return isAdmin
@@ -48,13 +64,13 @@ export default function DashboardLayout() {
     <div className={`app-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
       <aside className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`}>
         <div className="brand">
-          <span className="brand-mark"><BrandLogo className="brand-logo" /></span>
-          {!collapsed && <span className="brand-name">The Orvion<span>.</span></span>}
+          <span className="brand-mark"><WorkspaceLogo className="brand-logo" logo={business?.logo} name={business?.business_name || user?.business_name} /></span>
+          {!collapsed && <span className="brand-name">{business?.business_name || user?.business_name || 'Your business'}</span>}
           <button className="mobile-close icon-button" onClick={() => setMobileOpen(false)} aria-label="Close navigation"><X size={18} /></button>
         </div>
         <div className="workspace-switcher">
-          <span className="business-avatar">{(user?.business_name || user?.name || 'B')[0].toUpperCase()}</span>
-          {!collapsed && <><span className="workspace-name"><strong>{user?.business_name || 'Your business'}</strong><small>Business workspace</small></span><ChevronDown size={15} /></>}
+          <WorkspaceLogo className="business-avatar" logo={business?.logo} name={business?.business_name || user?.business_name} />
+          {!collapsed && <><span className="workspace-name"><strong>{business?.business_name || user?.business_name || 'Your business'}</strong><small>Business workspace</small></span><ChevronDown size={15} /></>}
         </div>
         <div className="nav-label">{!collapsed && 'Workspace'}</div>
         <nav className="side-nav" aria-label="Main navigation">
