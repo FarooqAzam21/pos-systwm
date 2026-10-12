@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.services.cache import create_redis_client, set_redis_client
 from redis import RedisError
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -15,10 +19,12 @@ async def lifespan(application: FastAPI):
     if client is not None:
         try:
             client.ping()
+            logger.info("redis_startup_connected")
         except RedisError:
             # Redis is an optional accelerator; keep the API available without it.
-            import logging
-            logging.getLogger(__name__).warning("redis_startup_unavailable fallback=database", exc_info=True)
+            logger.warning("redis_startup_unavailable fallback=database", exc_info=True)
+    else:
+        logger.warning("redis_not_configured fallback=database")
     application.state.redis_cache = client
     try:
         yield
