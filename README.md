@@ -49,6 +49,8 @@ The Vite application is at the repository root; its source tree is `src/`.
 
 Never commit `.env` files or production secrets.
 
+Migration `0008_secure_public_tables` enables row-level security on every existing table in the exposed `public` schema and revokes direct table/sequence privileges from Supabase's `anon` and `authenticated` roles. The POS frontend accesses data only through FastAPI, so it does not need direct PostgREST table access. The backend must continue connecting with the PostgreSQL owner role; that server-side role bypasses RLS. Public API roles receive no policies, so direct Supabase Data API access is denied by default. Enable RLS on any new public-schema tables as well.
+
 ## Run locally
 
 ### Backend
