@@ -8,6 +8,7 @@ import { useToast } from '../context/useToast'
 import { useAuth } from '../context/useAuth'
 import { formatCurrency } from '../utils/formatters'
 import BrandLogo from '../components/BrandLogo'
+import ThermalReceipt from '../components/ThermalReceipt'
 
 const amount = formatCurrency
 
@@ -99,8 +100,12 @@ export default function SaleDetails() {
   return (
     <div className="commerce-page invoice-page">
       <div className="page-heading sale-actions"><div><Link className="back-link" to="/sales"><ArrowLeft size={14} />Sales</Link><span className="eyebrow">SALE INVOICE</span><h1>{sale.invoice_number}</h1><p>{new Date(sale.sale_date).toLocaleString()} · {sale.status}</p></div>
-        <div className="sale-action-buttons">{Number(sale.outstanding_amount) > 0 && sale.status !== 'voided' && <button className="primary-button" onClick={() => { setPayment({ ...payment, amount: String(sale.outstanding_amount) }); setShowPayment(true) }}><CreditCard size={15} />Receive payment</button>}<button className="ghost-button" onClick={() => window.print()}><Printer size={15} />Print invoice</button><button className="ghost-button" disabled={downloading} onClick={downloadInvoice}><Download size={15} />{downloading ? 'Preparing PDF…' : 'Download PDF'}</button>{canManageReturns && sale.status !== 'returned' && sale.status !== 'voided' && <button className="primary-button" onClick={() => setShowReturn(true)}><RotateCcw size={15} />Return items</button>}</div>
+        <div className="sale-action-buttons">{Number(sale.outstanding_amount) > 0 && sale.status !== 'voided' && <button className="primary-button" onClick={() => { setPayment({ ...payment, amount: String(sale.outstanding_amount) }); setShowPayment(true) }}><CreditCard size={15} />Receive payment</button>}<button className="ghost-button" onClick={() => window.print()}><Printer size={15} />Print Receipt</button><button className="ghost-button" disabled={downloading} onClick={downloadInvoice}><Download size={15} />{downloading ? 'Preparing PDF…' : 'Download PDF'}</button>{canManageReturns && sale.status !== 'returned' && sale.status !== 'voided' && <button className="primary-button" onClick={() => setShowReturn(true)}><RotateCcw size={15} />Return items</button>}</div>
       </div>
+      <section className="thermal-preview-section" aria-label="Receipt preview">
+        <div className="thermal-preview-heading"><div><span className="eyebrow">80MM RECEIPT PREVIEW</span><h2>Customer receipt</h2><p>This narrow preview is formatted for standard 80mm thermal paper.</p></div><button className="primary-button" onClick={() => window.print()}><Printer size={15} />Print Receipt</button></div>
+        <ThermalReceipt sale={sale} business={business} cashierName={user?.name} amount={amount} />
+      </section>
       <article className="panel print-invoice invoice-card">
         <div className="invoice-heading"><div>{business?.logo && <BrandLogo src={business.logo} className="invoice-brand-logo" />}<span className="eyebrow">INVOICE</span><h2>{business?.business_name || user?.business_name}</h2><p>{business?.address || ''}{business?.phone ? ` · ${business.phone}` : ''}</p><p>{business?.email || ''}</p></div><div><strong>{sale.invoice_number}</strong><span>{new Date(sale.sale_date).toLocaleString()}</span><span>Cashier: {sale.cashier_name || user?.name}</span></div></div>
         <div className="invoice-customer"><span>Customer</span><strong>{sale.customer_name || 'Walk-in customer'}</strong>{sale.customer_phone && <span>{sale.customer_phone}</span>}{sale.customer_address && <span>{sale.customer_address}</span>}{sale.customer_id && <Link to={`/customers/${sale.customer_id}`}>View account</Link>}</div>
