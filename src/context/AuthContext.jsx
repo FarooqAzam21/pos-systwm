@@ -33,7 +33,11 @@ export function AuthProvider({ children }) {
     setAccessToken(token)
     authService.me()
       .then(setUser)
-      .catch(logout)
+      .catch((error) => {
+        // Only discard a session when the server confirms it is invalid. A
+        // timeout/network error during a Render cold start must not erase it.
+        if (error.response?.status === 401) logout()
+      })
       .finally(() => setLoading(false))
     return () => window.removeEventListener('auth:expired', onExpired)
   }, [logout])
