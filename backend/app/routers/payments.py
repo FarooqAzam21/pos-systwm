@@ -118,7 +118,7 @@ def receive_customer_payment(payload: CustomerPaymentCreate, user: User = Depend
 
 
 @router.post("/sale", status_code=201)
-def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)), db: Session = Depends(get_db)) -> dict:
+def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(require_permission(Permission.SALE_PAYMENT_RECEIVE)), db: Session = Depends(get_db)) -> dict:
     try:
         payment = create_sale_payment(db, user, payload)
         record_audit(
@@ -127,6 +127,10 @@ def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(requir
         )
         db.commit()
         db.refresh(payment)
+        sale = db.scalar(select(Sale).where(
+            Sale.id == payload.sale_id,
+            Sale.business_id == user.business_id,
+        ))
         return {
             "id": payment.id,
             "sale_id": payload.sale_id,
@@ -135,6 +139,13 @@ def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(requir
             "payment_date": payment.payment_date,
             "reference_number": payment.reference_number,
             "notes": payment.notes,
+            # Add the authoritative post-commit balance so clients can issue a
+            # payment receipt even if a subsequent detail refresh is unavailable.
+            "invoice_number": sale.invoice_number if sale else None,
+            "total_amount": sale.total_amount if sale else None,
+            "paid_amount": sale.paid_amount if sale else None,
+            "outstanding_amount": sale.outstanding_amount if sale else None,
+            "payment_status": sale.payment_status.value if sale else None,
         }
     except Exception:
         db.rollback()

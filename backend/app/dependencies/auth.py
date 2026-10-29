@@ -20,6 +20,7 @@ class Permission(StrEnum):
     POS = "pos"
     SALES_READ = "sales_read"
     SALES_CREATE = "sales_create"
+    SALE_PAYMENT_RECEIVE = "sale_payment_receive"
     SALES_RETURN = "sales_return"
     CUSTOMER_READ = "customer_read"
     CUSTOMER_WRITE = "customer_write"
@@ -43,7 +44,7 @@ INVENTORY_PERMISSIONS = frozenset({
 })
 CASHIER_PERMISSIONS = frozenset({
     Permission.DASHBOARD, Permission.POS, Permission.SALES_READ, Permission.SALES_CREATE,
-    Permission.CUSTOMER_READ, Permission.CUSTOMER_WRITE, Permission.PRODUCT_READ,
+    Permission.SALE_PAYMENT_RECEIVE, Permission.CUSTOMER_READ, Permission.CUSTOMER_WRITE, Permission.PRODUCT_READ,
     Permission.BUSINESS_READ,
 })
 ROLE_PERMISSIONS = {

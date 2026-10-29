@@ -524,6 +524,17 @@
 .thermal-footer { text-align: center; }
 .thermal-footer p { margin: 1.5mm 0; }
 .thermal-footer small { display: block; margin-top: 3mm; font-size: 9px; }
+.thermal-receipt-kind { text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.thermal-payment-received { padding: 2mm 0; border-top: 1px dashed #222; border-bottom: 1px dashed #222; font-size: 13px; font-weight: 700; }
+.sales-payment-receipt { padding: 18px; border: 1px solid #e6eaf0; border-radius: 14px; background: #fff; }
+.payment-receipt-actions { display: flex; align-items: center; gap: 8px; }
+.sales-payment-receipt .thermal-receipt { border-radius: 3px; }
+@media (max-width: 600px) {
+  .sales-payment-receipt { padding: 12px; }
+  .sales-payment-receipt .thermal-preview-heading { align-items: flex-start; flex-direction: column; }
+  .payment-receipt-actions { width: 100%; }
+  .payment-receipt-actions > button { flex: 1; justify-content: center; }
+}
 
 @media print {
   @page { size: 80mm auto; margin: 0; }
