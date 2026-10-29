@@ -97,7 +97,7 @@ def test_cashier_management_permissions_and_dashboard(client):
 
     created = client.post("/users", headers=owner_headers, json={
         "name": "Managed User",
-        "email": "managed-user@day3-permissions.test",
+        "email": "managed-user@gmail.com",
         "password": "Secret-user-password-123!",
         "role": "Cashier",
     })

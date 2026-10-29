@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.purchase import Purchase, PurchaseItem
 from app.models.payment import Payment, PaymentReferenceType
 from app.models.supplier import Supplier
@@ -96,7 +96,7 @@ def list_purchases(
     end_date: date | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=200),
-    user: User = Depends(require_roles(*OPERATORS)),
+    user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     stmt = select(Purchase).where(Purchase.business_id == user.business_id)
@@ -114,9 +114,11 @@ def list_purchases(
 @router.post("", status_code=status.HTTP_201_CREATED)
 def add_purchase(
     payload: PurchaseCreate,
-    user: User = Depends(require_roles(*OPERATORS)),
+    user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
+    if user.role in {UserRole.MANAGER, UserRole.INVENTORY_MANAGER} and payload.paid_amount > 0:
+        raise HTTPException(status_code=403, detail="Inventory managers cannot record supplier payments")
     try:
         purchase = create_purchase(db, user, payload)
         record_audit(
@@ -132,7 +134,7 @@ def add_purchase(
 
 
 @router.get("/{purchase_id}")
-def get_purchase(purchase_id: UUID, user: User = Depends(require_roles(*OPERATORS)), db: Session = Depends(get_db)) -> dict:
+def get_purchase(purchase_id: UUID, user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)), db: Session = Depends(get_db)) -> dict:
     purchase = db.scalar(select(Purchase).where(
         Purchase.id == purchase_id,
         Purchase.business_id == user.business_id,

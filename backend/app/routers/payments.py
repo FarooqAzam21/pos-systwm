@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
+from app.dependencies.auth import Permission, get_current_user, require_permission
 from app.models.payment import Payment
 from app.models.customer import Customer
 from app.models.purchase import Purchase
@@ -29,7 +29,7 @@ def list_payments(
     start_date: date | None = None,
     end_date: date | None = None,
     limit: int = Query(default=100, ge=1, le=500),
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     stmt = select(Payment).where(Payment.business_id == user.business_id)
@@ -100,7 +100,7 @@ def list_payments(
 
 
 @router.post("/customer", response_model=list[PaymentRead], status_code=201)
-def receive_customer_payment(payload: CustomerPaymentCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> list[Payment]:
+def receive_customer_payment(payload: CustomerPaymentCreate, user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)), db: Session = Depends(get_db)) -> list[Payment]:
     try:
         records = create_customer_payment(db, user, payload)
         for record in records:
@@ -118,7 +118,7 @@ def receive_customer_payment(payload: CustomerPaymentCreate, user: User = Depend
 
 
 @router.post("/sale", status_code=201)
-def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)), db: Session = Depends(get_db)) -> dict:
     try:
         payment = create_sale_payment(db, user, payload)
         record_audit(
@@ -144,7 +144,7 @@ def receive_sale_payment(payload: SalePaymentCreate, user: User = Depends(get_cu
 @router.post("/supplier", status_code=201)
 def pay_supplier(
     payload: SupplierPaymentCreate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> dict:
     try:

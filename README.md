@@ -164,6 +164,23 @@ python -m compileall -q app alembic tests
 
 Apply schema changes to the configured PostgreSQL database with `alembic upgrade head`. Migration `0007` normalizes customer phones, consolidates records sharing a phone within a business, reattaches their sales/payments/audit references, preserves combined balances and adds a unique business-phone index. Apply it before deploying the API version that requires unique phone numbers.
 
+## Staff roles and first-login activation
+
+The server authorizes requests using the current user row and a centralized permission allow-list in `backend/app/dependencies/auth.py`. `Owner` has full workspace access and manages staff. `Cashier` can use checkout, read permitted sales and product details, and save customer contact information; cost and margin fields are withheld. `Inventory Manager` can manage catalog, stock, suppliers, and purchases, but not staff or financial reporting. Existing `Manager` accounts retain their inventory permissions and are not reassigned. Existing `Admin` accounts retain broad legacy access except staff and audit administration. All records continue to use the current single-business-per-user `business_id` model and are scoped on the backend.
+
+Owners create staff from **Staff management** with a Gmail-address username, a temporary password, and Cashier or Inventory Manager role. Email suffix is validated but ownership is not verified; there is no configured email delivery. On the staff member's first login, the owner approves the pending request and generates or reveals the five-minute OTP in the owner dashboard's **Settings** page, then shares it privately out of band. The code is encrypted in the database for the owner-only reveal endpoint and independently HMAC-verified; it is single use and limited to five attempts. The staff member must set a new strong password before receiving a normal API token. The owner can reset a password or revoke sessions; generated temporary credentials are shown once in the authenticated owner UI and must be shared directly.
+
+Access tokens remain bearer tokens in the existing frontend storage and are checked against a database token version on each protected request. Role changes, deactivation, password resets, and session revocation increment that version, immediately rejecting prior tokens. This preserves the existing stateless JWT/API contract while adding one database lookup per authenticated request. Activation encryption derives its key from `SECRET_KEY`; keep that production secret stable, because rotating it invalidates outstanding activation codes (and existing JWTs).
+
+For deployment, back up PostgreSQL, deploy the migration before the new API, then deploy the backend and frontend:
+
+```powershell
+cd backend
+alembic upgrade head
+```
+
+The new `0009_staff_activation_rbac` migration is additive: existing accounts are marked activated and do not have their role or password changed. It adds session-version and activation fields and a private `activation_requests` table with row-level security enabled and direct Supabase API roles revoked. Verify the migration revision with `alembic current` after applying it. No Redis environment variable is required for authorization; cache contents are never used to grant permissions. No OTP email provider is configured, so the owner-assisted delivery workflow is an explicit operational requirement.
+
 ## Optional Redis caching
 
 The API can run without Redis. Set `REDIS_URL` on the backend to enable the shared Redis-compatible cache; PostgreSQL remains authoritative for all business data. Cached reads currently cover dashboard overview, report summaries and paginated reports, the category list, and business settings. Dashboard TTL is 30 seconds, reports and categories 60 seconds, and business settings 10 minutes (each cache entry receives up to 10% TTL jitter). Product and inventory quantities, transactions, payment balances, customers, and suppliers are intentionally not cached.

@@ -6,7 +6,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.expense import Expense, ExpenseCategory
 from app.models.payment import PaymentMethod
 from app.models.user import User, UserRole
@@ -62,7 +62,7 @@ def serialize_expense(db: Session, expense: Expense) -> dict:
 
 @router.get("/categories")
 def list_expense_categories(
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     ensure_default_categories(db, user.business_id)
@@ -76,7 +76,7 @@ def list_expense_categories(
 @router.post("/categories", status_code=201)
 def create_expense_category(
     payload: ExpenseCategoryCreate,
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> dict:
     name = payload.name.strip()
@@ -103,7 +103,7 @@ def list_expenses(
     end_date: date | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=200),
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     if start_date and end_date and end_date < start_date:
@@ -175,7 +175,7 @@ def list_expenses(
 @router.post("", status_code=201)
 def create_expense(
     payload: ExpenseCreate,
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> dict:
     category = db.scalar(select(ExpenseCategory).where(
@@ -207,7 +207,7 @@ def create_expense(
 @router.get("/{expense_id}")
 def read_expense(
     expense_id: UUID,
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     expense = db.scalar(select(Expense).where(
@@ -223,7 +223,7 @@ def read_expense(
 def update_expense(
     expense_id: UUID,
     payload: ExpenseUpdate,
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> dict:
     expense = db.scalar(select(Expense).where(
@@ -254,7 +254,7 @@ def update_expense(
 @router.delete("/{expense_id}", status_code=204)
 def delete_expense(
     expense_id: UUID,
-    user: User = Depends(require_roles(*MANAGERS)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> None:
     expense = db.scalar(select(Expense).where(

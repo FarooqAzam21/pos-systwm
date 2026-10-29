@@ -26,7 +26,7 @@ const links = [
   { label: 'Payments', to: '/payments', icon: CreditCard },
   { label: 'Reports', to: '/reports', icon: ChartNoAxesColumn },
   { label: 'Settings', to: '/settings', icon: SettingsIcon },
-  { label: 'Users', to: '/users', icon: Users },
+  { label: 'Staff management', to: '/users', icon: Users },
   { label: 'Audit logs', to: '/audit-logs', icon: ShieldCheck },
 ]
 
@@ -37,9 +37,10 @@ export default function DashboardLayout() {
   const [business, setBusiness] = useState(null)
   const { user, logout } = useAuth()
   const { notify } = useToast()
-  const managerRoles = ['Owner', 'Admin', 'Manager']
-  const isManager = managerRoles.includes(user?.role)
-  const isAdmin = ['Owner', 'Admin'].includes(user?.role)
+  const role = user?.role
+  const isOwner = role === 'Owner'
+  const isAdmin = ['Owner', 'Admin'].includes(role)
+  const isInventoryManager = ['Owner', 'Admin', 'Manager', 'Inventory Manager'].includes(role)
   useEffect(() => {
     let active = true
     const loadBusiness = () => businessService.get().then((data) => { if (active) setBusiness(data) }).catch(() => {})
@@ -48,9 +49,12 @@ export default function DashboardLayout() {
     return () => { active = false; window.removeEventListener('business-profile-updated', loadBusiness) }
   }, [])
   const visibleLinks = links.filter(({ label }) => {
-    if (['Expenses', 'Payments', 'Purchases', 'Suppliers', 'Inventory', 'Returns', 'Reports'].includes(label)) return isManager
-    if (label === 'Users') return isAdmin
-    if (label === 'Audit logs') return isAdmin
+    if (label === 'Dashboard') return isAdmin
+    if (['POS', 'Sales'].includes(label)) return ['Owner', 'Admin', 'Cashier'].includes(role)
+    if (label === 'Customers') return ['Owner', 'Admin'].includes(role)
+    if (['Purchases', 'Suppliers', 'Inventory'].includes(label)) return isInventoryManager
+    if (['Expenses', 'Payments', 'Returns', 'Reports'].includes(label)) return isAdmin
+    if (label === 'Staff management' || label === 'Audit logs') return isOwner
     return true
   })
   const initials = user?.name?.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'U'

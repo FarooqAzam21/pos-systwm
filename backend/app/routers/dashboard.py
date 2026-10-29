@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user
+from app.dependencies.auth import Permission, get_current_user, require_permission
 from app.models.sale import Sale, SaleStatus
 from app.models.user import User
 from app.services.commerce import dashboard_overview
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 def get_dashboard_overview(
     start_date: date | None = None,
     end_date: date | None = None,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission(Permission.DASHBOARD)),
     db: Session = Depends(get_db),
 ) -> dict:
     today = business_today(db, user.business_id)
@@ -36,7 +36,7 @@ def get_dashboard_overview(
         raise HTTPException(status_code=422, detail="Date range cannot exceed 366 days")
 
     def load() -> dict:
-        if user.role.value == "Cashier":
+        if user.role.value in {"Cashier", "Inventory Manager", "Manager"}:
             today_start, today_end = business_datetime_bounds(db, user.business_id, today, today)
             totals = db.execute(
                 select(func.coalesce(func.sum(Sale.total_amount), 0), func.count(Sale.id)).where(

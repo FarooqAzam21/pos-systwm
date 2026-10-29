@@ -10,7 +10,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.business import Business
 from app.models.daily_closing import DailyClosing
 from app.models.user import User, UserRole
@@ -130,7 +130,7 @@ def _range(db: Session, business_id, start_date: date | None, end_date: date | N
 def read_dashboard_analytics(
     start_date: date | None = None,
     end_date: date | None = None,
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     start, end = _range(db, user.business_id, start_date, end_date)
@@ -145,7 +145,7 @@ def read_dashboard_analytics(
 def read_profit_and_loss(
     start_date: date | None = None,
     end_date: date | None = None,
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     start, end = _range(db, user.business_id, start_date, end_date)
@@ -159,7 +159,7 @@ def read_profit_and_loss(
 @router.get("/daily-closing")
 def read_daily_closing(
     report_date: date | None = None,
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     report_day = report_date or business_today(db, user.business_id)
@@ -175,7 +175,7 @@ def read_daily_closing(
 @router.post("/daily-closing", status_code=201)
 def create_daily_closing(
     payload: DailyClosingCreate,
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> dict:
     existing = db.scalar(select(DailyClosing).where(
@@ -216,7 +216,7 @@ def export_excel(
     status: str | None = None,
     movement_type: str | None = None,
     search: str | None = None,
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> StreamingResponse:
     start, end = _range(db, user.business_id, start_date, end_date)
@@ -268,7 +268,7 @@ def export_pdf(
     status: str | None = None,
     movement_type: str | None = None,
     search: str | None = None,
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> StreamingResponse:
     if report_name not in PDF_REPORTS:
@@ -324,7 +324,7 @@ def read_report(
     search: str | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=50, ge=1, le=200),
-    user: User = Depends(require_roles(*REPORT_ROLES)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     start, end = _range(db, user.business_id, start_date, end_date)

@@ -1,5 +1,6 @@
 from app.models.business import Business
 from app.models.audit_log import AuditLog
+from app.models.activation_request import ActivationRequest
 from app.models.category import Category
 from app.models.customer import Customer
 from app.models.expense import Expense, ExpenseCategory
@@ -16,6 +17,7 @@ from app.models.user import User, UserRole
 __all__ = [
     "Business",
     "AuditLog",
+    "ActivationRequest",
     "Expense",
     "ExpenseCategory",
     "DailyClosing",

@@ -6,6 +6,7 @@ import { getApiErrorMessage } from '../services/api'
 import { businessService } from '../services/businessService'
 import PasswordRequirements, { isStrongPassword } from '../components/PasswordRequirements'
 import { CURRENCY_KEY } from '../utils/formatters'
+import StaffActivationPanel from '../components/StaffActivationPanel'
 
 const emptyBusiness = { business_name: '', owner_name: '', email: '', phone: '', address: '', city: '', tax_number: '', currency: 'USD', timezone: 'UTC', invoice_prefix: 'INV', invoice_footer: '', logo: '' }
 
@@ -82,6 +83,7 @@ export default function Settings() {
     <div className="settings-page">
       <div className="page-heading"><div><span className="eyebrow">PREFERENCES</span><h1>Settings</h1><p>Manage your business profile and personal account details.</p></div></div>
       {loading ? <div className="settings-skeleton"><div className="panel skeleton" /><div className="panel skeleton" /></div> : <>
+        {user?.role === 'Owner' && <StaffActivationPanel />}
         <form className="panel settings-card" onSubmit={saveBusiness}>
           <div className="settings-section-heading"><span className="section-icon business-icon"><Building2 size={19} /></span><div><h2>Business profile</h2><p>These details identify your business workspace.</p></div></div>
           {!canManageBusiness && <div className="permission-note"><LockKeyhole size={15} />Only an Owner or Admin can edit business information.</div>}

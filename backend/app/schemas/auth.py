@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime
 import re
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -63,6 +64,9 @@ class UserRead(BaseModel):
     business_id: UUID
     business_name: str
     is_active: bool
+    is_activated: bool = True
+    must_change_password: bool = False
+    last_login_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -88,6 +92,21 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserRead
+
+
+class ActivationVerifyRequest(BaseModel):
+    request_id: UUID
+    otp: str = Field(pattern=r"^\d{6}$")
+
+
+class PasswordChangeRequest(BaseModel):
+    challenge_token: str
+    new_password: str = Field(min_length=10, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def strong_password(cls, value: str) -> str:
+        return validate_strong_password(value)
 
 
 class TokenPayload(BaseModel):

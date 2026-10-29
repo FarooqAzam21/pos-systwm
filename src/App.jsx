@@ -30,10 +30,19 @@ import Reports from './pages/Reports'
 import AuditLogs from './pages/AuditLogs'
 import Users from './pages/Users'
 import { ProtectedRoute, PublicRoute, RoleGuard } from './routes/RouteGuards'
+import { useAuth } from './context/useAuth'
 import './App.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
+
+function WorkspaceHomeRedirect() {
+  const { user } = useAuth()
+  const target = user?.role === 'Cashier' ? '/pos'
+    : ['Manager', 'Inventory Manager'].includes(user?.role) ? '/inventory'
+      : '/dashboard'
+  return <Navigate to={target} replace />
+}
 
 function App() {
   return (
@@ -46,12 +55,22 @@ function App() {
             <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
             <Route element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
-                <Route path="dashboard" element={<Suspense fallback={<LoadingState label="Loading dashboard…" />}><Dashboard /></Suspense>} />
+                <Route element={<RoleGuard roles={['Owner', 'Admin']} redirectTo={(user) => user?.role === 'Cashier' ? '/pos' : '/inventory'} />}>
+                  <Route path="dashboard" element={<Suspense fallback={<LoadingState label="Loading dashboard…" />}><Dashboard /></Suspense>} />
+                </Route>
                 <Route path="settings" element={<Settings />} />
-                <Route path="pos" element={<POS />} />
-                <Route path="sales" element={<Sales />} />
-                <Route path="sales/:saleId" element={<SaleDetails />} />
-                <Route path="returns" element={<Returns />} />
+                <Route element={<RoleGuard roles={['Owner', 'Admin', 'Cashier']} />}>
+                  <Route path="pos" element={<POS />} />
+                  <Route path="sales" element={<Sales />} />
+                  <Route path="sales/:saleId" element={<SaleDetails />} />
+                </Route>
+                <Route element={<RoleGuard roles={['Owner', 'Admin']} />}>
+                  <Route path="returns" element={<Returns />} />
+                  <Route path="payments" element={<Payments />} />
+                  <Route path="expenses" element={<Expenses />} />
+                  <Route path="reports" element={<Reports />} />
+                </Route>
+                <Route element={<RoleGuard roles={['Owner', 'Admin', 'Manager', 'Inventory Manager']} />}>
                 <Route path="inventory" element={<InventoryPage />}>
                   <Route index element={<InventoryOverview />} />
                   <Route path="products" element={<InventoryProducts />} />
@@ -59,26 +78,24 @@ function App() {
                   <Route path="suppliers" element={<InventorySuppliers />} />
                   <Route path="movements" element={<InventoryMovements />} />
                   <Route path="low-stock" element={<InventoryLowStock />} />
-                  <Route element={<RoleGuard roles={['Owner', 'Admin', 'Manager']} />}>
+                  <Route element={<RoleGuard roles={['Owner', 'Admin', 'Manager', 'Inventory Manager']} />}>
                     <Route path="orders" element={<PurchaseOrders />} />
                   </Route>
                 </Route>
                 <Route path="purchases" element={<Purchases />} />
                 <Route path="purchases/new" element={<PurchaseNew />} />
                 <Route path="purchases/:purchaseId" element={<PurchaseDetails />} />
-                <Route path="customers" element={<Customers />} />
-                <Route path="customers/:customerId" element={<CustomerDetails />} />
-                <Route path="payments" element={<Payments />} />
-                <Route path="suppliers" element={<Navigate to="/inventory/suppliers" replace />} />
-                <Route element={<RoleGuard roles={['Owner', 'Admin', 'Manager']} />}>
-                  <Route path="expenses" element={<Expenses />} />
-                  <Route path="reports" element={<Reports />} />
                 </Route>
                 <Route element={<RoleGuard roles={['Owner', 'Admin']} />}>
+                  <Route path="customers" element={<Customers />} />
+                  <Route path="customers/:customerId" element={<CustomerDetails />} />
+                </Route>
+                <Route path="suppliers" element={<Navigate to="/inventory/suppliers" replace />} />
+                <Route element={<RoleGuard roles={['Owner']} />}>
                   <Route path="users" element={<Users />} />
                   <Route path="audit-logs" element={<AuditLogs />} />
                 </Route>
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={<WorkspaceHomeRedirect />} />
               </Route>
             </Route>
           </Routes>

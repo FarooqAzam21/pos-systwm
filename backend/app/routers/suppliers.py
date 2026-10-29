@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.supplier import Supplier
 from app.models.purchase import Purchase
 from app.models.user import User, UserRole
@@ -42,7 +42,7 @@ def supplier_read(db: Session, supplier: Supplier, outstanding=None) -> dict:
 
 @router.get("", response_model=list[SupplierRead])
 def list_suppliers(
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     suppliers = db.scalars(
@@ -66,7 +66,7 @@ def list_suppliers(
 @router.get("/{supplier_id}", response_model=SupplierRead)
 def read_supplier(
     supplier_id: UUID,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     supplier = db.scalar(
@@ -85,7 +85,7 @@ def read_supplier(
 @router.post("", response_model=SupplierRead, status_code=201)
 def create_supplier(
     payload: SupplierCreate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Supplier:
     supplier = Supplier(
@@ -111,7 +111,7 @@ def create_supplier(
 def update_supplier(
     supplier_id: UUID,
     payload: SupplierUpdate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Supplier:
     supplier = db.scalar(
@@ -141,7 +141,7 @@ def update_supplier(
 @router.delete("/{supplier_id}", response_model=SupplierRead)
 def delete_supplier(
     supplier_id: UUID,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Supplier:
     supplier = db.scalar(

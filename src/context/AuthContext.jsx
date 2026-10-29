@@ -23,6 +23,15 @@ export function AuthProvider({ children }) {
     setUser(session.user)
   }, [])
 
+  const updateAccount = useCallback(async (details) => {
+    const updated = await authService.updateMe(details)
+    setUser(updated)
+    // The backend increments the token version after a password change. Clear
+    // the now-revoked browser token immediately and require a fresh sign-in.
+    if (details.new_password) logout()
+    return updated
+  }, [logout])
+
   useEffect(() => {
     const onExpired = () => logout()
     window.addEventListener('auth:expired', onExpired)
@@ -52,11 +61,20 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     user,
     loading,
-    login: async (credentials) => acceptSession(await authService.login(credentials)),
+    login: async (credentials) => {
+      const result = await authService.login(credentials)
+      if (result.access_token) acceptSession(result)
+      return result
+    },
+    finishActivation: async (challenge) => {
+      const session = await authService.finishActivation(challenge)
+      acceptSession(session)
+      return session
+    },
     register: async (details) => acceptSession(await authService.register(details)),
-    updateAccount: async (details) => setUser(await authService.updateMe(details)),
+    updateAccount,
     logout,
-  }), [user, loading, acceptSession, logout])
+  }), [user, loading, acceptSession, logout, updateAccount])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

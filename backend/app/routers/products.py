@@ -6,7 +6,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.category import Category
 from app.models.product import Product
 from app.models.stock_movement import MovementType, StockMovement
@@ -72,7 +72,7 @@ def list_products(
     active_only: bool = False,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=200),
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission(Permission.PRODUCT_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     stmt = select(Product).options(selectinload(Product.category)).where(Product.business_id == user.business_id)
@@ -112,7 +112,7 @@ def list_products(
 @router.get("/{product_id}", response_model=dict)
 def read_product(
     product_id: UUID,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission(Permission.PRODUCT_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     product = db.scalar(
@@ -131,7 +131,7 @@ def read_product(
 @router.post("", response_model=dict, status_code=201)
 def create_product(
     payload: ProductCreate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     sku = payload.sku.strip()
@@ -218,7 +218,7 @@ def create_product(
 def update_product(
     product_id: UUID,
     payload: ProductUpdate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     product = db.scalar(
@@ -305,7 +305,7 @@ def update_product(
 @router.delete("/{product_id}", response_model=dict)
 def delete_product(
     product_id: UUID,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     product = db.scalar(

@@ -5,7 +5,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.audit_log import AuditLog
 from app.models.user import User, UserRole
 from app.services.dates import business_datetime_bounds
@@ -21,7 +21,7 @@ def list_audit_logs(
     search: str | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=50, ge=1, le=200),
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN)),
+    user: User = Depends(require_permission(Permission.AUDIT_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     stmt = select(AuditLog).where(AuditLog.business_id == user.business_id)

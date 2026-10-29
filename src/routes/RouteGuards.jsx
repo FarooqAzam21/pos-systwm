@@ -14,8 +14,9 @@ export function PublicRoute({ children }) {
   return user ? <Navigate to="/dashboard" replace /> : children
 }
 
-export function RoleGuard({ roles }) {
+export function RoleGuard({ roles, redirectTo = '/dashboard', children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingState label="Checking permissions…" />
-  return roles.includes(user?.role) ? <Outlet /> : <Navigate to="/dashboard" replace />
+  const destination = typeof redirectTo === 'function' ? redirectTo(user) : redirectTo
+  return roles.includes(user?.role) ? (children ?? <Outlet />) : <Navigate to={destination} replace />
 }

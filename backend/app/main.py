@@ -1,5 +1,9 @@
 from contextlib import asynccontextmanager
 import logging
+from fastapi import Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -57,6 +61,18 @@ app = FastAPI(
     description="Multi-tenant SaaS foundation for business operations.",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def redact_secret_validation_inputs(_request: Request, exc: RequestValidationError):
+    errors = []
+    for error in exc.errors():
+        item = dict(error)
+        location = {str(part).lower() for part in item.get("loc", ())}
+        if location & {"password", "new_password", "current_password", "otp", "challenge_token", "access_token"}:
+            item["input"] = "[redacted]"
+        errors.append(item)
+    return JSONResponse(status_code=422, content=jsonable_encoder({"detail": errors}))
 
 app.add_middleware(
     CORSMiddleware,

@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.product import Product
 from app.models.purchase import Purchase
 from app.models.purchase_order import PurchaseOrder, PurchaseOrderItem
@@ -37,7 +37,7 @@ def read_order(db: Session, order: PurchaseOrder) -> dict:
 
 
 @router.get("")
-def list_orders(search: str | None = None, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=200), user: User = Depends(require_roles(*OPERATORS)), db: Session = Depends(get_db)):
+def list_orders(search: str | None = None, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=200), user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)), db: Session = Depends(get_db)):
     stmt = select(PurchaseOrder).where(PurchaseOrder.business_id == user.business_id)
     if search:
         stmt = stmt.where(PurchaseOrder.order_number.ilike(f"%{search.strip()}%"))
@@ -47,7 +47,7 @@ def list_orders(search: str | None = None, page: int = Query(1, ge=1), limit: in
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def create_order(payload: PurchaseOrderCreate, user: User = Depends(require_roles(*OPERATORS)), db: Session = Depends(get_db)):
+def create_order(payload: PurchaseOrderCreate, user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)), db: Session = Depends(get_db)):
     supplier = db.scalar(select(Supplier).where(Supplier.id == payload.supplier_id, Supplier.business_id == user.business_id, Supplier.is_active.is_(True)))
     if not supplier:
         raise HTTPException(status_code=404, detail="Active supplier not found")
@@ -70,7 +70,7 @@ def create_order(payload: PurchaseOrderCreate, user: User = Depends(require_role
 
 
 @router.patch("/{order_id}")
-def update_order_status(order_id: UUID, payload: PurchaseOrderStatusUpdate, user: User = Depends(require_roles(*OPERATORS)), db: Session = Depends(get_db)):
+def update_order_status(order_id: UUID, payload: PurchaseOrderStatusUpdate, user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)), db: Session = Depends(get_db)):
     order = db.scalar(select(PurchaseOrder).where(PurchaseOrder.id == order_id, PurchaseOrder.business_id == user.business_id))
     if not order:
         raise HTTPException(status_code=404, detail="Purchase order not found")
@@ -84,7 +84,9 @@ def update_order_status(order_id: UUID, payload: PurchaseOrderStatusUpdate, user
 
 
 @router.post("/{order_id}/receive", status_code=status.HTTP_201_CREATED)
-def receive_order(order_id: UUID, payload: PurchaseCreate, user: User = Depends(require_roles(*OPERATORS)), db: Session = Depends(get_db)):
+def receive_order(order_id: UUID, payload: PurchaseCreate, user: User = Depends(require_permission(Permission.PURCHASE_MANAGE)), db: Session = Depends(get_db)):
+    if user.role in {UserRole.MANAGER, UserRole.INVENTORY_MANAGER} and payload.paid_amount > 0:
+        raise HTTPException(status_code=403, detail="Inventory managers cannot record supplier payments")
     order = db.scalar(select(PurchaseOrder).where(PurchaseOrder.id == order_id, PurchaseOrder.business_id == user.business_id))
     if not order:
         raise HTTPException(status_code=404, detail="Purchase order not found")

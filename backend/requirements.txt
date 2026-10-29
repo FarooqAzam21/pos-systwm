@@ -7,6 +7,7 @@ pydantic[email]>=2.8,<3.0
 pydantic-settings>=2.4,<3.0
 pwdlib[argon2]>=0.2,<1.0
 PyJWT>=2.9,<3.0
+cryptography>=42,<47
 reportlab>=4.2,<5.0
 openpyxl>=3.1,<4.0
 redis>=5.0,<9.0

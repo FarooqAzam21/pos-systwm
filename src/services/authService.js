@@ -13,6 +13,12 @@ export const authService = {
   async me() {
     return (await api.get('/auth/me', { timeout: AUTH_REQUEST_TIMEOUT })).data
   },
+  async verifyActivation(request_id, otp) {
+    return (await api.post('/auth/activation/verify', { request_id, otp }, { timeout: AUTH_REQUEST_TIMEOUT })).data
+  },
+  async finishActivation(payload) {
+    return (await api.post('/auth/activation/password', payload, { timeout: AUTH_REQUEST_TIMEOUT })).data
+  },
   async updateMe(details) {
     return (await api.put('/auth/me', details)).data
   },

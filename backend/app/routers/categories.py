@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
+from app.dependencies.auth import Permission, require_permission
 from app.models.category import Category
 from app.models.user import User, UserRole
 from app.schemas.category import CategoryCreate, CategoryRead, CategoryUpdate
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/categories", tags=["Categories"])
 
 @router.get("", response_model=list[CategoryRead])
 def list_categories(
-    user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    user: User = Depends(require_permission(Permission.PRODUCT_READ)), db: Session = Depends(get_db)
 ) -> list[Category]:
     return cached_response(
         "categories", user.business_id, user.role.value, {}, settings.catalog_cache_ttl_seconds,
@@ -31,7 +31,7 @@ def list_categories(
 @router.get("/{category_id}", response_model=CategoryRead)
 def read_category(
     category_id: UUID,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission(Permission.PRODUCT_READ)),
     db: Session = Depends(get_db),
 ) -> Category:
     category = db.scalar(
@@ -50,7 +50,7 @@ def read_category(
 @router.post("", response_model=CategoryRead, status_code=201)
 def create_category(
     payload: CategoryCreate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Category:
     name = payload.name.strip()
@@ -83,7 +83,7 @@ def create_category(
 def update_category(
     category_id: UUID,
     payload: CategoryUpdate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Category:
     category = db.scalar(
@@ -125,7 +125,7 @@ def update_category(
 @router.delete("/{category_id}", response_model=CategoryRead)
 def delete_category(
     category_id: UUID,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Category:
     category = db.scalar(

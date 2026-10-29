@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
+from app.dependencies.auth import Permission, get_current_user, require_permission
 from app.models.category import Category
 from app.models.product import Product
 from app.models.stock_movement import MovementType, StockMovement
@@ -37,7 +37,7 @@ def decimal_to_string(value):
 
 @router.get("", response_model=InventorySummary)
 def inventory_summary(
-    user: User = Depends(require_roles(*INVENTORY_MANAGERS)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     products = db.scalars(
@@ -67,7 +67,7 @@ def inventory_summary(
 
 @router.get("/low-stock", response_model=list[LowStockItem])
 def low_stock(
-    user: User = Depends(require_roles(*INVENTORY_MANAGERS)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     products = db.scalars(
@@ -101,7 +101,7 @@ def low_stock(
 
 @router.get("/out-of-stock", response_model=list[dict])
 def out_of_stock_products(
-    user: User = Depends(require_roles(*INVENTORY_MANAGERS)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     products = db.scalars(
@@ -128,7 +128,7 @@ def out_of_stock_products(
 @router.get("/{product_id}/movements", response_model=list[ProductMovementRead])
 def list_product_movements(
     product_id: UUID,
-    user: User = Depends(require_roles(*INVENTORY_MANAGERS)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> list[StockMovement]:
     product = db.scalar(
@@ -185,7 +185,7 @@ def list_product_movements(
 def create_opening_stock(
     product_id: UUID,
     payload: OpeningStockRequest,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> ProductMovementRead:
     product = db.scalar(
@@ -255,7 +255,7 @@ def create_opening_stock(
 def adjust_inventory(
     product_id: UUID,
     payload: ProductAdjustmentRequest,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.INVENTORY_MANAGE)),
     db: Session = Depends(get_db),
 ) -> dict:
     product = db.scalar(

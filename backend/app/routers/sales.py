@@ -23,7 +23,7 @@ from sqlalchemy.orm import Session
 from app.models.business import Business
 from app.models.customer import Customer
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
+from app.dependencies.auth import Permission, get_current_user, require_permission
 from app.models.payment import Payment, PaymentReferenceType
 from app.models.sale import Sale, SalePaymentStatus
 from app.models.sale_return import SaleReturn, SaleReturnItem
@@ -76,7 +76,7 @@ def _fetch_invoice_logo(url: str | None) -> BytesIO | None:
 @router.get("/sales/{sale_id}/invoice/pdf")
 def download_invoice_pdf(
     sale_id: UUID,
-    user: AccountUser = Depends(get_current_user),
+    user: AccountUser = Depends(require_permission(Permission.SALES_READ)),
     db: Session = Depends(get_db),
 ) -> Response:
     sale_data = sale_details(db, user.business_id, sale_id)
@@ -233,7 +233,7 @@ def get_returns(
     search: str | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=200),
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     stmt = select(SaleReturn).where(SaleReturn.business_id == user.business_id)
@@ -270,7 +270,7 @@ def get_sales(
     end_date: date | None = None,
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=200),
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_permission(Permission.SALES_READ)),
     db: Session = Depends(get_db),
 ) -> dict:
     if payment_status and payment_status not in {item.value for item in SalePaymentStatus}:
@@ -284,7 +284,9 @@ def get_sales(
 
 
 @router.post("/sales", status_code=status.HTTP_201_CREATED)
-def create_sale(payload: SaleCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+def create_sale(payload: SaleCreate, user: User = Depends(require_permission(Permission.SALES_CREATE)), db: Session = Depends(get_db)) -> dict:
+    if user.role == UserRole.CASHIER and (payload.discount > 0 or any(item.discount > 0 for item in payload.items)):
+        raise HTTPException(status_code=403, detail="Cashiers cannot apply discounts")
     try:
         sale = checkout(db, user, payload)
         record_audit(
@@ -301,7 +303,7 @@ def create_sale(payload: SaleCreate, user: User = Depends(get_current_user), db:
 
 
 @router.get("/sales/{sale_id}")
-def get_sale(sale_id: UUID, user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> dict:
+def get_sale(sale_id: UUID, user: User = Depends(require_permission(Permission.SALES_READ)), db: Session = Depends(get_db)) -> dict:
     result = sale_details(db, user.business_id, sale_id)
     return remove_sale_cost_details(result) if user.role == UserRole.CASHIER else result
 
@@ -310,7 +312,7 @@ def get_sale(sale_id: UUID, user: User = Depends(get_current_user), db: Session 
 def return_sale(
     sale_id: UUID,
     payload: SaleReturnCreate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_WRITE)),
     db: Session = Depends(get_db),
 ) -> dict:
     try:
@@ -339,7 +341,7 @@ def return_sale(
 @router.get("/sales/{sale_id}/returns")
 def list_returns(
     sale_id: UUID,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN, UserRole.MANAGER)),
+    user: User = Depends(require_permission(Permission.FINANCIAL_READ)),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     sale = db.scalar(select(Sale).where(Sale.id == sale_id, Sale.business_id == user.business_id))

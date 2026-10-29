@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.dependencies.auth import get_current_user, require_roles
+from app.dependencies.auth import Permission, get_current_user, require_permission
 from app.models.business import Business
 from app.models.user import User, UserRole
 from app.schemas.business import BusinessRead, BusinessUpdate
@@ -35,7 +35,7 @@ def read_business(
 @router.put("", response_model=BusinessRead)
 def update_business(
     payload: BusinessUpdate,
-    user: User = Depends(require_roles(UserRole.OWNER, UserRole.ADMIN)),
+    user: User = Depends(require_permission(Permission.BUSINESS_MANAGE)),
     db: Session = Depends(get_db),
 ) -> Business:
     business = get_user_business(user, db)

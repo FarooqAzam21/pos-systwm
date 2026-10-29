@@ -336,6 +336,8 @@
 .order-line { grid-template-columns: minmax(180px, 2fr) minmax(90px, .6fr) minmax(130px, 1fr) auto; }
 .table-secondary { display: block; margin-top: 4px; color: #8993a0; font-size: 11px; }
 .table-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.activation-code-wrap { display: inline-flex; align-items: center; gap: 6px; }
+.activation-code { letter-spacing: .14em; font-size: 18px; color: #3549cf; }
 .purchase-footer { display: grid; grid-template-columns: 1fr 220px; gap: 20px; padding-top: 16px; border-top: 1px solid #edf0f4; }
 .purchase-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 12px; }
 .purchase-totals { display: grid; align-content: start; gap: 9px; }
