@@ -44,7 +44,7 @@ The Vite application is at the repository root; its source tree is `src/`.
 2. Copy `backend/.env.example` to `backend/.env`.
 3. Set `DATABASE_URL` to your PostgreSQL connection string using the `postgresql+psycopg://` driver form. URL-encode special characters in credentials.
 4. Replace `SECRET_KEY` with a private random value of at least 32 characters.
-5. Set `ACCESS_TOKEN_EXPIRE_MINUTES` and comma-separated `FRONTEND_ORIGINS` (include `https://pos-systwm.vercel.app` for the deployed frontend).
+5. Set `ACCESS_TOKEN_EXPIRE_MINUTES` and comma-separated `FRONTEND_ORIGINS` (include `https://pos-systwm.vercel.app` for the deployed frontend). The backend always includes this canonical production origin as a safeguard against a stale Render override.
 6. Copy root `.env.example` to `.env` if the frontend API URL differs from `http://localhost:8000`.
 
 Never commit `.env` files or production secrets.

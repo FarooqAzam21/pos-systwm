@@ -14,6 +14,19 @@ from redis import RedisError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+PRODUCTION_FRONTEND_ORIGIN = "https://pos-systwm.vercel.app"
+
+
+def get_allowed_frontend_origins(configured_origins: str) -> list[str]:
+    # Keep the deployed application origin enabled even if Render has an old
+    # FRONTEND_ORIGINS override that accidentally omits it.
+    origins = {
+        origin.strip().rstrip("/")
+        for origin in configured_origins.split(",")
+        if origin.strip()
+    }
+    origins.add(PRODUCTION_FRONTEND_ORIGIN)
+    return sorted(origins)
 
 
 @asynccontextmanager
@@ -76,7 +89,7 @@ async def redact_secret_validation_inputs(_request: Request, exc: RequestValidat
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[origin.strip().rstrip("/") for origin in settings.frontend_origins.split(",") if origin.strip()],
+    allow_origins=get_allowed_frontend_origins(settings.frontend_origins),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],
