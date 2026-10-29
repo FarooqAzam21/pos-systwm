@@ -1,7 +1,15 @@
 import axios from 'axios'
 
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim()
+const productionApiUrl = 'https://theorvion-pos-syst3m.onrender.com'
+const localApiUrl = 'http://localhost:8000'
+const configuredLocalhost = configuredApiUrl && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?$/i.test(configuredApiUrl)
+const apiBaseUrl = (import.meta.env.PROD && (!configuredApiUrl || configuredLocalhost)
+  ? productionApiUrl
+  : configuredApiUrl || localApiUrl).replace(/\/+$/, '')
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseURL: apiBaseUrl,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15000,
 })
