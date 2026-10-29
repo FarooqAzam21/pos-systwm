@@ -179,6 +179,14 @@ cd backend
 alembic upgrade head
 ```
 
+For this Render service, the current login failure means the deployed API is already using the new model while PostgreSQL is still behind it. In Render's backend **Start Command**, run the migration before Uvicorn (the service's working directory should be `backend`):
+
+```sh
+alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+```
+
+If the service's working directory is the repository root instead, use `cd backend && alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Use Render's configured `DATABASE_URL`; back it up before the first schema upgrade. The migration must finish successfully before the API starts. After redeploy, confirm the log shows `Running upgrade 0008_secure_public_tables -> 0009_staff_activation_rbac` and then verify `alembic current` reports `0009_staff_activation_rbac`.
+
 The new `0009_staff_activation_rbac` migration is additive: existing accounts are marked activated and do not have their role or password changed. It adds session-version and activation fields and a private `activation_requests` table with row-level security enabled and direct Supabase API roles revoked. Verify the migration revision with `alembic current` after applying it. No Redis environment variable is required for authorization; cache contents are never used to grant permissions. No OTP email provider is configured, so the owner-assisted delivery workflow is an explicit operational requirement.
 
 ## Optional Redis caching

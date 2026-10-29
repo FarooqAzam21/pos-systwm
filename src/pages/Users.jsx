@@ -97,15 +97,20 @@ export default function Users() {
       </div>
       {error && <section className="panel report-error" role="alert"><span>{error}</span><button type="button" className="ghost-button" onClick={() => setReload((value) => value + 1)}>Retry</button></section>}
       {showForm && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowForm(false) }}>
-        <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="user-form-title">
-          <div className="panel-heading"><div><h2 id="user-form-title">{editing ? 'Edit user' : 'Add user'}</h2><p>Access is limited to this business.</p></div></div>
-          <form className="stack-form" onSubmit={submit}>
-            <label>Name<input required minLength="2" maxLength="120" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-            <label>Gmail username<input required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="staff@gmail.com" /><small>Gmail addresses are required. Address ownership is not verified by this form.</small></label>
-            {!editing && <><label>Temporary password<span className="password-field"><input required type={showPassword ? 'text' : 'password'} minLength="12" maxLength="128" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}</button></span></label><PasswordRequirements password={form.password} minLength={12} /></>}
-            <label>Role<select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>{(editing && !roles.includes(form.role) ? [...roles, form.role] : roles).map((role) => <option key={role} value={role}>{['Manager', 'Admin'].includes(role) ? `${role} (legacy)` : role}</option>)}</select></label>
-            {editing && <label className="checkbox-row"><input type="checkbox" checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} />Active account</label>}
-            <div className="form-actions"><button type="button" className="ghost-button" onClick={() => setShowForm(false)}>Cancel</button><button type="submit" className="primary-button" disabled={saving}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create user'}</button></div>
+        <section className="modal-card user-modal" role="dialog" aria-modal="true" aria-labelledby="user-form-title">
+          <div className="user-modal-heading"><span className="eyebrow">WORKSPACE ACCESS</span><h2 id="user-form-title">{editing ? 'Edit user' : 'Add user'}</h2><p>Set up secure access for this business workspace.</p></div>
+          <form className="user-form" onSubmit={submit}>
+            <div className="user-form-fields">
+              <label>Name<input required minLength="2" maxLength="120" autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="Staff member name" /></label>
+              <label>Gmail username<input required type="email" autoComplete="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} placeholder="staff@gmail.com" /><small>Use a Gmail address. Ownership is not verified here.</small></label>
+              {!editing && <>
+                <label className="user-form-password">Temporary password<span className="password-field"><input required type={showPassword ? 'text' : 'password'} minLength="12" maxLength="128" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder="Create a temporary password" /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword((value) => !value)}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></span></label>
+                <PasswordRequirements password={form.password} minLength={12} className="user-password-requirements" />
+              </>}
+              <label className="user-form-role">Role<select value={form.role} onChange={(event) => setForm({ ...form, role: event.target.value })}>{(editing && !roles.includes(form.role) ? [...roles, form.role] : roles).map((role) => <option key={role} value={role}>{['Manager', 'Admin'].includes(role) ? `${role} (legacy)` : role}</option>)}</select></label>
+              {editing && <label className="user-form-active"><input type="checkbox" checked={form.is_active} onChange={(event) => setForm({ ...form, is_active: event.target.checked })} />Active account</label>}
+            </div>
+            <div className="user-form-actions"><button type="button" className="ghost-button" onClick={() => setShowForm(false)}>Cancel</button><button type="submit" className="primary-button" disabled={saving}>{saving ? 'Saving…' : editing ? 'Save changes' : 'Create user'}</button></div>
           </form>
         </section>
       </div>}

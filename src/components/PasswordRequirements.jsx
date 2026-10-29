@@ -10,9 +10,9 @@ export const passwordRequirements = (password, minLength = 10) => [
 export const isStrongPassword = (password, minLength = 10) =>
   passwordRequirements(password, minLength).every(({ met }) => met)
 
-export default function PasswordRequirements({ password, minLength = 10 }) {
+export default function PasswordRequirements({ password, minLength = 10, className = '' }) {
   return (
-    <ul className="password-requirements" aria-label="Password requirements" aria-live="polite">
+    <ul className={`password-requirements ${className}`.trim()} aria-label="Password requirements" aria-live="polite">
       {passwordRequirements(password, minLength).map(({ label, met }) => (
         <li className={met ? 'met' : ''} key={label}>
           {met ? <Check size={13} aria-hidden="true" /> : <Circle size={13} aria-hidden="true" />}

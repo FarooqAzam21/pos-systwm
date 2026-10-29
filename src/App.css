@@ -286,6 +286,29 @@
 .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; overflow: auto; padding: 20px; background: #17203366; }
 .modal-card { width: min(100%, 520px); max-height: calc(100vh - 40px); overflow: auto; padding: 20px; border: 1px solid #e8ebf0; border-radius: 12px; background: white; box-shadow: 0 20px 70px #17203335; }
 .modal-card.large { width: min(100%, 760px); }
+.user-modal { width: min(100%, 600px); padding: 28px; border-color: #e5e9f2; border-radius: 16px; box-shadow: 0 28px 90px #17203330; }
+.user-modal-heading { padding-bottom: 19px; margin-bottom: 22px; border-bottom: 1px solid #edf0f5; }
+.user-modal-heading .eyebrow { color: #6879e8; }
+.user-modal-heading h2 { margin: 7px 0 0; color: #222d3d; font: 800 23px/1.25 Manrope, sans-serif; letter-spacing: -.55px; }
+.user-modal-heading p { margin: 6px 0 0; color: #7e8999; font-size: 13px; }
+.user-form { display: grid; gap: 23px; }
+.user-form-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 19px 18px; }
+.user-form-fields > label { display: grid; min-width: 0; gap: 8px; color: #425064; font-size: 13px; font-weight: 650; }
+.user-form-fields > label > input, .user-form-fields > label > select, .user-form-fields .password-field input { width: 100%; min-width: 0; min-height: 48px; padding: 0 13px; border: 1px solid #dce2eb; border-radius: 9px; outline: none; color: #283549; background: #fff; font-size: 14px; transition: border-color .15s, box-shadow .15s, background .15s; }
+.user-form-fields > label > input:focus, .user-form-fields > label > select:focus, .user-form-fields .password-field input:focus { border-color: #7688f1; box-shadow: 0 0 0 4px #5064e918; }
+.user-form-fields > label > input::placeholder { color: #a2aab6; }
+.user-form-fields > label > small { margin-top: -2px; color: #8792a2; font-size: 11px; font-weight: 400; line-height: 1.5; }
+.user-form-fields .user-form-password, .user-form-fields .user-password-requirements { grid-column: 1 / -1; }
+.user-form-fields .password-field { display: block; width: 100%; }
+.user-form-fields .password-field button { width: 46px; height: 48px; color: #78869a; }
+.user-form-fields .user-password-requirements { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; padding: 12px 14px; margin: -10px 0 0; border: 1px solid #edf0f5; border-radius: 10px; color: #778497; background: #f8f9fc; font-size: 11px; }
+.user-password-requirements li { gap: 8px; }
+.user-password-requirements li svg { flex: 0 0 auto; }
+.user-form-fields .user-form-role { max-width: 100%; }
+.user-form-fields .user-form-active { display: flex; min-height: 48px; grid-column: 1 / -1; align-items: center; gap: 9px; }
+.user-form-active input { width: 17px; height: 17px; accent-color: var(--blue); }
+.user-form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 18px; border-top: 1px solid #edf0f5; }
+.user-form-actions .ghost-button, .user-form-actions .primary-button { min-width: 104px; min-height: 44px; border-radius: 9px; font-size: 12px; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .modal-header h3 { margin: 0; color: #303b4a; font: 700 15px Manrope, sans-serif; }
 .inventory-form { display: grid; gap: 13px; }
@@ -667,6 +690,12 @@
   .pagination-row span { flex: 1 1 100%; order: -1; text-align: center; }
   .modal-backdrop { align-items: start; padding: 10px; }
   .modal-card, .modal-card.large, .product-modal { width: 100% !important; max-height: calc(100dvh - 20px); padding: 16px; border-radius: 12px; }
+  .user-modal { padding: 21px 18px; border-radius: 14px; }
+  .user-form-fields { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .user-form-fields .user-form-password, .user-form-fields .user-password-requirements, .user-form-fields .user-form-active { grid-column: auto; }
+  .user-form-fields .user-password-requirements { margin-top: -7px; }
+  .user-form-actions { justify-content: stretch; }
+  .user-form-actions > button { flex: 1; }
   .invoice-page .sale-action-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .invoice-page .sale-action-buttons > button { justify-content: center; padding: 0 8px; font-size: 10px; }
   .invoice-page .sale-action-buttons > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
@@ -675,6 +704,7 @@
 }
 
 @media (max-width: 380px) {
+  .user-form-fields .user-password-requirements { grid-template-columns: minmax(0, 1fr); }
   .topbar-workspace { display: none; }
   .topbar-left, .topbar-actions { gap: 3px; }
   .page-heading h1 { font-size: 19px; }
