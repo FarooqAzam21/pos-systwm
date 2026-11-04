@@ -546,7 +546,8 @@
   .topbar-workspace { display: none; }
   .topbar-left, .topbar-actions { gap: 3px; }
   .page-heading h1 { font-size: 19px; }
-}pi-icon.amber { color: #bd852e; background: #fff3df; }.kpi-icon.rose { color: #d66c68; background: #fff0ee; }.kpi-icon.cyan { color: #4395b0; background: #e8f5f9; }
+}
+.kpi-icon.amber { color: #bd852e; background: #fff3df; }.kpi-icon.rose { color: #d66c68; background: #fff0ee; }.kpi-icon.cyan { color: #4395b0; background: #e8f5f9; }
 .kpi-copy { min-width: 0; padding-top: 1px; }
 .kpi-copy > span { display: block; color: #87919e; font-size: 10px; }
 .kpi-copy > strong { display: block; margin: 5px 0 5px; color: #283344; font: 800 20px Manrope, sans-serif; letter-spacing: -.4px; }
@@ -1196,4 +1197,333 @@
   .icon-button-inline, .icon-button { min-width: 40px; min-height: 40px; }
   .primary-button, .ghost-button, .category-add-button { min-height: 44px; }
   .inventory-tab { min-height: 46px; }
+}
+
+/* Keep these shared component styles after legacy module rules so the dark
+   theme remains consistent on every authenticated route. */
+.page-heading h1,
+.coming-soon h1,
+.panel-heading h2,
+.settings-section-heading h2,
+.panel-heading h2,
+.settings-section-heading h2,
+.user-modal-heading h2,
+.return-sale-summary h3,
+.invoice-heading h2,
+.product-name-cell strong,
+.pos-product-title {
+  color: #edf5ff;
+}
+
+.page-heading p,
+.panel-heading p,
+.settings-section-heading p,
+.coming-soon p,
+.dashboard-status,
+.dashboard-status p,
+.pagination-row,
+.select-input,
+.return-sale-summary p {
+  color: #91a2b9;
+}
+
+.panel,
+.chart-panel,
+.commerce-panel,
+.inventory-panel,
+.settings-card,
+.report-summary-card,
+.modal-card,
+.user-modal,
+.profile-dropdown,
+.invoice-card,
+.return-create-panel,
+.return-entry,
+.pos-catalog,
+.pos-cart {
+  border-color: rgba(158, 180, 213, 0.14);
+  border-radius: 18px;
+  color: #e8f1fb;
+  background: linear-gradient(160deg, rgba(17, 32, 50, 0.96), rgba(9, 19, 32, 0.94));
+  box-shadow: 0 20px 45px rgba(2, 8, 20, 0.3);
+  backdrop-filter: blur(16px);
+}
+
+.panel-heading h2,
+.settings-section-heading h2,
+.user-modal-heading h2,
+.product-name-cell strong,
+.inventory-panel td strong,
+.commerce-panel td strong,
+.report-summary-card strong,
+.dashboard-list strong,
+.dashboard-list b,
+.chart-total strong,
+.donut-center strong,
+.category-legend strong,
+.product-description strong,
+.product-revenue,
+.invoice-heading h2,
+.invoice-heading strong,
+.invoice-totals,
+.invoice-payments h3,
+.invoice-payments strong,
+.return-sale-summary h3,
+.return-refund-total strong {
+  color: #edf5ff;
+}
+
+.kpi-copy > span,
+.kpi-copy small,
+.panel-heading p,
+.chart-legend,
+.category-legend > div > span,
+.product-description small,
+.table-subtext,
+.expense-note,
+.report-summary-card span,
+.report-search,
+.inventory-panel td,
+.commerce-panel td,
+.invoice-heading p,
+.invoice-payments p,
+.invoice-customer,
+.invoice-items td,
+.return-sale-summary p {
+  color: #91a2b9;
+}
+
+.kpi-copy > strong { color: #f4f8fc; }
+.kpi-icon.blue, .kpi-icon.cyan { color: #baf4ff; background: rgba(53,214,232,0.17); }
+.kpi-icon.green { color: #cbfce8; background: rgba(57,214,167,0.17); }
+.kpi-icon.violet { color: #e1ddff; background: rgba(143,110,255,0.17); }
+.kpi-icon.amber { color: #ffe3a1; background: rgba(240,187,98,0.17); }
+.kpi-icon.rose { color: #ffd1d1; background: rgba(233,139,139,0.17); }
+
+.dashboard-status {
+  border: 1px solid rgba(158, 180, 213, 0.1);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.025);
+}
+
+.dashboard-list > div,
+.product-row,
+.dashboard-recent .panel-heading,
+.settings-form-footer,
+.user-form-actions {
+  border-color: rgba(158, 180, 213, 0.1);
+}
+
+.dashboard-list > div { color: #c4d2e3; }
+.dashboard-list small { color: #8295ad; }
+.panel-heading h2,
+.settings-section-heading h2 { font-size: 15px; }
+.category-chart-body .recharts-pie-sector { filter: drop-shadow(0 5px 12px rgba(2, 8, 20, 0.22)); }
+.recharts-cartesian-grid line { stroke: rgba(157, 177, 205, 0.13); }
+.recharts-text,
+.recharts-cartesian-axis-tick-value { fill: #8fa0b7; }
+.recharts-default-tooltip,
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  border: 1px solid rgba(158, 180, 213, 0.18) !important;
+  border-radius: 12px !important;
+  color: #eaf3ff !important;
+  background: rgba(9, 19, 32, 0.96) !important;
+  box-shadow: 0 18px 34px rgba(2, 8, 20, 0.35) !important;
+}
+
+.search-input,
+.report-search {
+  border-color: rgba(158, 180, 213, 0.15);
+  color: #9fb0c4;
+  background: rgba(255,255,255,0.025);
+}
+
+.search-input input,
+.report-search input,
+.filter-select,
+.date-field input,
+.commerce-page select,
+.commerce-page input,
+.commerce-page textarea,
+.settings-form-grid input,
+.settings-form-grid select,
+.auth-form input,
+.inventory-form input,
+.inventory-form select,
+.inventory-form textarea,
+.purchase-form input,
+.purchase-form select,
+.purchase-form textarea,
+.return-lookup input,
+.return-form-footer input,
+.return-form-footer select,
+.return-quantity-input,
+.user-form-fields > label > input,
+.user-form-fields > label > select,
+.user-form-fields .password-field input,
+.pos-checkout input,
+.pos-checkout select {
+  border-color: rgba(158, 180, 213, 0.16);
+  color: #edf5ff;
+  background-color: rgba(6, 15, 27, 0.62);
+}
+
+.search-input input::placeholder,
+.report-search input::placeholder,
+.commerce-page input::placeholder,
+.inventory-form input::placeholder,
+.settings-form-grid input::placeholder,
+.auth-form input::placeholder,
+.user-form-fields input::placeholder {
+  color: #71839b;
+}
+
+select option { color: #edf5ff; background: #0b1b2d; }
+
+.settings-form-grid label,
+.auth-form label,
+.user-form-fields > label,
+.return-lookup label,
+.return-form-footer label,
+.pos-checkout label {
+  color: #adbed1;
+}
+
+.settings-form-grid input:disabled,
+.settings-form-grid select:disabled {
+  color: #8193aa;
+  background: rgba(255,255,255,0.025);
+}
+
+.panel-heading,
+.table-toolbar,
+.report-tabs,
+.report-filter-panel,
+.report-summary-card,
+.permission-note,
+.user-password-requirements,
+.invoice-customer,
+.invoice-payments,
+.invoice-totals,
+.invoice-items th,
+.commerce-panel th,
+.inventory-panel th {
+  border-color: rgba(158, 180, 213, 0.12);
+  color: #9aacc2;
+  background-color: rgba(255,255,255,0.025);
+}
+
+.commerce-panel th,
+.inventory-panel th,
+.invoice-items th { color: #91a2b9; }
+.commerce-panel td,
+.inventory-panel td,
+.invoice-items td {
+  border-color: rgba(158, 180, 213, 0.1);
+  color: #aebdd0;
+}
+
+.commerce-panel td a,
+.invoice-card a,
+.auth-switch a { color: #55d9e8; }
+
+.commerce-panel tbody tr:hover,
+.inventory-panel tbody tr:hover,
+.inventory-panel tbody tr:hover td:last-child {
+  background: rgba(255,255,255,0.035);
+}
+
+.inventory-panel td:last-child { background: #0d1b2d; }
+.sku-chip,
+.product-rank,
+.tiny-trend,
+.coming-icon,
+.permission-note,
+.user-form-fields .user-password-requirements {
+  border-color: rgba(158, 180, 213, 0.12);
+  color: #b7c8db;
+  background: rgba(255,255,255,0.04);
+}
+
+.stock-state.success, .tag.success { color: #91edc6; background: rgba(57,214,167,0.12); }
+.stock-state.warning, .tag.warning { color: #f2ce86; background: rgba(240,187,98,0.12); }
+.stock-state.danger { color: #f3a5a2; background: rgba(233,139,139,0.12); }
+.tag.neutral, .tag.muted { color: #a2b2c5; background: rgba(158,180,213,0.1); }
+
+.primary-button,
+.category-add-button,
+.auth-submit,
+.user-form-actions .primary-button {
+  border-color: transparent;
+  color: #07111f;
+  background: linear-gradient(135deg, #35d6e8, #21c9b5);
+  box-shadow: 0 10px 24px rgba(53,214,232,0.17);
+}
+
+.primary-button:hover:not(:disabled),
+.category-add-button:hover:not(:disabled),
+.auth-submit:hover:not(:disabled) {
+  border-color: transparent;
+  color: #07111f;
+  background: linear-gradient(135deg, #58dfeb, #36d5c1);
+}
+
+.ghost-button,
+.subtle-action,
+.icon-button-inline {
+  border-color: rgba(158, 180, 213, 0.16);
+  color: #c2d0e0;
+  background: rgba(255,255,255,0.035);
+}
+
+.ghost-button:hover:not(:disabled),
+.icon-button-inline:hover {
+  border-color: rgba(53,214,232,0.28);
+  color: #eafaff;
+  background: rgba(53,214,232,0.08);
+}
+
+.modal-backdrop { background: rgba(2, 7, 14, 0.74); backdrop-filter: blur(8px); }
+.modal-card,
+.user-modal { background: rgba(10, 20, 34, 0.97); }
+.user-modal-heading,
+.user-form-actions { border-color: rgba(158, 180, 213, 0.12); }
+.user-modal-heading p,
+.user-form-fields > label > small,
+.password-requirements { color: #90a2b9; }
+.user-form-fields .user-password-requirements { background: rgba(255,255,255,0.025); }
+
+.auth-screen {
+  color: #edf5ff;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(53,214,232,0.12), transparent 38%),
+    #07111f;
+}
+.auth-brand-name,
+.auth-heading h1 { color: #edf5ff; }
+.auth-heading p,
+.auth-switch { color: #91a2b9; }
+.auth-heading .eyebrow { color: #58dbe7; }
+.auth-aside {
+  border-left: 1px solid rgba(158,180,213,0.12);
+  background: linear-gradient(145deg, rgba(17,39,58,0.96), rgba(7,17,31,0.98));
+}
+.auth-aside > div:nth-child(2) > span { color: #58dbe7; }
+.auth-aside p { color: #a6b6c9; }
+.auth-aside > small { color: #8295ad; }
+.toast {
+  border-color: rgba(57,214,167,0.25);
+  color: #a8f0d0;
+  background: rgba(9, 33, 32, 0.96);
+  box-shadow: 0 14px 34px rgba(2, 8, 20, 0.35);
+}
+.toast.error {
+  border-color: rgba(233,139,139,0.28);
+  color: #ffc0bc;
+  background: rgba(43, 20, 27, 0.97);
+}
+
+.skeleton { background: rgba(255,255,255,0.05); }
+.skeleton::after {
+  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.1) 50%, transparent 80%);
 }
